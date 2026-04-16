@@ -1,0 +1,800 @@
+:root {
+    --bg-paper: #f4ebd8; /* Classic Japanese parchment / washi paper base */
+    --ink-black: #1a1a1a;
+    --ink-light: #524f46;
+    --ink-red: #8b1e28; /* Crimson stamp/ink color */
+    --paper-card: #fdfaf3; /* Brighter paper for elements */
+    --transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    --gold: #b8860b;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Serif JP', serif;
+    background-color: var(--bg-paper);
+    color: var(--ink-black);
+    line-height: 1.8;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    /* Custom Pen Cursor */
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><text y='20' font-size='20'>🖋️</text></svg>") 0 20, auto;
+    
+    /* Paper Texture Overlay */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-paper); }
+::-webkit-scrollbar-thumb { background: var(--ink-light); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-red); }
+
+a, button, .nav-link {
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><text y='20' font-size='20'>🖋️</text></svg>") 0 20, pointer !important;
+}
+
+h1, h2, h3, h4, .logo, .badge {
+    font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+    font-weight: 600;
+}
+
+.vintage-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    pointer-events: none;
+    z-index: 1;
+    background: radial-gradient(circle at 50% 50%, transparent 60%, rgba(139, 30, 40, 0.05) 100%);
+}
+
+#inkCanvas {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* Navbar */
+.navbar {
+    position: fixed;
+    top: 0; left: 0; width: 100%;
+    padding: 1.5rem 0;
+    z-index: 100;
+    background: linear-gradient(to bottom, rgba(244, 235, 216, 0.95), transparent);
+    transition: var(--transition);
+}
+
+.nav-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+}
+
+.logo {
+    font-size: 1.2rem;
+    color: var(--ink-black);
+    letter-spacing: 2px;
+}
+
+.logo span {
+    color: var(--ink-red);
+    font-size: 0.8rem;
+    letter-spacing: 4px;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 3rem;
+}
+
+.nav-link {
+    background: none;
+    border: none;
+    color: var(--ink-light);
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+    transition: var(--transition);
+    font-family: 'Noto Serif JP', serif;
+    padding-bottom: 5px;
+    border-bottom: 1px solid transparent;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--ink-red);
+    border-bottom: 1px solid var(--ink-red);
+}
+
+/* Main Content Layout */
+#main-content {
+    min-height: 100vh;
+    padding-top: 5rem;
+}
+
+/* Section Containers */
+.section-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 6rem 2rem;
+}
+
+.chapter-header {
+    text-align: center;
+    margin-bottom: 5rem;
+}
+
+.chapter-num {
+    display: block;
+    color: var(--ink-light);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    letter-spacing: 4px;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
+.section-title {
+    font-size: 3.5rem;
+    color: var(--ink-black);
+    display: inline-block;
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 25%; width: 50%;
+    height: 1px;
+    background: var(--ink-red);
+}
+
+/* 3D BOOK CARDS (Members Registry) */
+.book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 2.5rem;
+    perspective: 1500px;
+}
+
+.book3d-container {
+    width: 100%;
+    height: 280px;
+    position: relative;
+}
+
+.book3d {
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    position: relative;
+}
+
+.book3d-container:hover .book3d {
+    transform: rotateY(-10deg);
+}
+
+.book-front {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: var(--ink-black);
+    border-left: 12px solid var(--ink-red);
+    box-shadow: 10px 10px 30px rgba(0,0,0,0.2);
+    transform-origin: left;
+    transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    z-index: 2;
+}
+
+.book3d-container:hover .book-front {
+    transform: rotateY(-145deg);
+}
+
+.book-cover-content {
+    border: 1px solid rgba(255,255,255,0.1);
+    margin: 1.2rem;
+    height: calc(100% - 2.4rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--bg-paper);
+}
+
+.book-cover-content i {
+    font-size: 1.8rem;
+    color: var(--gold);
+    margin-bottom: 0.8rem;
+}
+
+.book-cover-content h3 {
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+}
+
+.book-inside {
+    position: absolute;
+    width: calc(100% - 12px);
+    left: 12px;
+    height: 100%;
+    background: var(--paper-card);
+    color: var(--ink-black);
+    box-shadow: inset -5px 0 10px rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.1);
+    z-index: 1;
+}
+
+.book-page-content {
+    padding: 1.2rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.book-page-content h4 {
+    font-size: 1rem;
+    border-bottom: 1px solid var(--ink-black);
+    padding-bottom: 0.3rem;
+    margin-bottom: 0.8rem;
+}
+
+.book-page-content p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--ink-light);
+}
+
+/* Story Sections (Scroll Focus) */
+.hero-section {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.glow-text {
+    font-family: 'Cinzel', serif;
+    font-size: 6rem;
+    color: var(--ink-red);
+    letter-spacing: 20px;
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+}
+
+.narrative-box {
+    background: var(--paper-card);
+    padding: 4rem;
+    border-radius: 2px;
+    box-shadow: 15px 15px 40px rgba(0,0,0,0.05);
+    border-left: 8px solid var(--ink-red);
+    position: relative;
+    margin-bottom: 4rem;
+}
+
+.narrative-text {
+    font-size: 1.4rem;
+    line-height: 2.4;
+    text-align: justify;
+    color: var(--ink-black);
+}
+
+/* Chronicle Logs */
+.log-card {
+    background: var(--paper-card);
+    border: 1px solid rgba(26, 26, 26, 0.1);
+    padding: 3rem;
+    margin-bottom: 3rem;
+    position: relative;
+    transition: var(--transition);
+}
+
+.log-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 4px; height: 100%;
+    background: var(--ink-red);
+}
+
+.log-card h3 {
+    font-size: 2rem;
+    color: var(--ink-red);
+    margin-bottom: 1.5rem;
+}
+
+.episode-list {
+    margin-top: 2rem;
+    border-left: 2px dashed rgba(26, 26, 26, 0.2);
+    padding-left: 2rem;
+}
+
+.episode-item {
+    margin-bottom: 1.5rem;
+}
+
+.episode-item strong {
+    display: block;
+    font-size: 1.1rem;
+}
+
+/* Reveal Animations */
+.reveal {
+    opacity: 0;
+    transform: rotateX(-15deg) translateY(30px);
+    transition: opacity 1s cubic-bezier(0.25, 1, 0.5, 1), transform 1s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.reveal.visible {
+    opacity: 1;
+    transform: rotateX(0deg) translateY(0);
+}
+
+.footer {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--ink-light);
+    font-size: 0.9rem;
+    border-top: 1px solid rgba(26, 26, 26, 0.1);
+}
+
+/* Registry Search */
+.search-container {
+    margin-bottom: 4rem;
+    text-align: center;
+}
+
+.premium-search {
+    background: var(--paper-card);
+    border: none;
+    border-bottom: 2px solid var(--ink-black);
+    padding: 1rem 2rem;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.2rem;
+    width: 60%;
+    text-align: center;
+    color: var(--ink-black);
+    transition: var(--transition);
+}
+
+.premium-search:focus {
+    outline: none;
+    border-bottom-color: var(--ink-red);
+    width: 80%;
+}
+
+@media (max-width: 768px) {
+    .glow-text { font-size: 3rem; letter-spacing: 5px; }
+    .nav-links { display: none; }
+    .book-grid { grid-template-columns: 1fr; }
+}
+
+/* --- Bestiary & Dungeon Specific --- */
+
+.bestiary-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6rem;
+}
+
+.bestiary-scroll {
+    background: var(--paper-card);
+    padding: 4rem;
+    border: 1px solid rgba(26, 26, 26, 0.1);
+    box-shadow: 20px 20px 60px rgba(0,0,0,0.05);
+    position: relative;
+    border-radius: 4px;
+}
+
+/* Scroll handles effect */
+.bestiary-scroll::before, .bestiary-scroll::after {
+    content: '';
+    position: absolute;
+    left: -20px; right: -20px;
+    height: 15px;
+    background: #d4c4a8;
+    border: 1px solid #bba68d;
+    border-radius: 10px;
+}
+.bestiary-scroll::before { top: -10px; }
+.bestiary-scroll::after { bottom: -10px; }
+
+.boss-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid var(--ink-red);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.boss-id-wrap {
+    text-align: right;
+}
+
+/* DOOM Acronym Highlight */
+.doom-letter {
+    color: var(--ink-red);
+    font-size: 1.4em;
+    font-weight: 900;
+    text-decoration: underline;
+    text-shadow: 0 0 10px rgba(139, 30, 40, 0.2);
+}
+
+.boss-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin-top: 2rem;
+}
+
+.strategy-note {
+    background: rgba(184, 134, 11, 0.05);
+    border-left: 4px solid var(--gold);
+    padding: 1.5rem;
+    font-size: 0.95rem;
+    position: relative;
+    font-style: italic;
+}
+
+.strategy-note::before {
+    content: 'TIPS';
+    position: absolute;
+    top: -10px; left: 10px;
+    background: var(--gold);
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    font-style: normal;
+}
+
+.gimmick-list {
+    list-style: none;
+}
+
+.gimmick-list li {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.gimmick-list li::before {
+    content: '†';
+    position: absolute;
+    left: 0;
+    color: var(--ink-red);
+}
+
+/* Echidna Corrupted Effect */
+.echidna-corrupted {
+    border-color: #4a0000;
+    background: #110e0c;
+    color: #d4c4a8;
+    animation: flickerBoss 4s infinite;
+}
+
+.echidna-corrupted h3, .echidna-corrupted .doom-letter {
+    color: #ff4d4d;
+    text-shadow: 0 0 15px #ff0000;
+}
+
+@keyframes flickerBoss {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.98; transform: scale(1.002); }
+    98% { transform: skew(0deg); }
+    99% { transform: skew(1deg); }
+}
+
+/* Acronym Reveal Box */
+.acronym-reveal-box {
+    background: var(--ink-black);
+    color: var(--bg-paper);
+    padding: 2rem;
+    text-align: center;
+    margin: 4rem 0;
+    border: 2px solid var(--ink-red);
+}
+
+.acronym-display {
+    font-size: 4rem;
+    letter-spacing: 2rem;
+    font-family: 'Cinzel', serif;
+    color: var(--ink-red);
+    text-shadow: 0 0 20px var(--ink-red);
+}
+
+/* --- World (Dungeon) Specific --- */
+
+.dungeon-blueprint {
+    background: #e1d5bc; /* Darker, blueprint-like paper */
+    border: 2px solid var(--ink-light);
+    padding: 3rem;
+    position: relative;
+    margin-bottom: 4rem;
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.05), 10px 10px 0 rgba(0,0,0,0.1);
+}
+
+.dungeon-blueprint::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: linear-gradient(rgba(26,26,26,0.03) 1px, transparent 1px), 
+                      linear-gradient(90deg, rgba(26,26,26,0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+}
+
+.floor-badge {
+    position: absolute;
+    top: -15px;
+    left: 20px;
+    background: var(--ink-black);
+    color: var(--bg-paper);
+    padding: 5px 15px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+}
+
+.manifest-box {
+    background: #fffdf5;
+    border: 1px solid var(--ink-red);
+    padding: 2rem;
+    margin-bottom: 3rem;
+    position: relative;
+}
+
+.manifest-box h4 {
+    color: var(--ink-red);
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px dashed var(--ink-red);
+}
+
+.gimmick-tag {
+    display: inline-block;
+    padding: 2px 10px;
+    background: var(--ink-red);
+    color: white;
+    font-size: 0.7rem;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    font-family: 'Cinzel', serif;
+}
+
+.secret-stamp {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    border: 3px double var(--ink-red);
+    color: var(--ink-red);
+    padding: 5px 15px;
+    font-weight: 900;
+    transform: rotate(-15deg);
+    opacity: 0.6;
+    font-size: 1.2rem;
+    pointer-events: none;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+/* --- Guided Navigation --- */
+
+.hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.next-phase-footer {
+    text-align: center;
+    margin: 8rem 0 4rem;
+    border-top: 1px double rgba(26,26,26,0.1);
+    padding-top: 6rem;
+    position: relative;
+    width: 100%;
+}
+
+.next-phase-footer::before {
+    content: 'CHAPTER COMPLETE';
+    position: absolute;
+    top: -12px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-paper);
+    padding: 0 20px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.8rem;
+    letter-spacing: 3px;
+    color: var(--ink-light);
+}
+
+.next-chapter-btn {
+    background: var(--ink-red);
+    color: white;
+    border: none;
+    padding: 1.5rem 4rem;
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    transition: var(--transition);
+    box-shadow: 0 10px 30px rgba(139, 30, 40, 0.2);
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5rem;
+    cursor: pointer;
+}
+
+.next-chapter-btn:hover {
+    background: var(--ink-black);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid var(--ink-black);
+    color: var(--ink-black);
+    padding: 1rem 2.5rem;
+    font-family: 'Noto Serif JP', serif;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background: rgba(26, 26, 26, 0.05);
+}
+
+/* --- Alliances (Parties) Specific --- */
+
+.party-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 3rem;
+}
+
+.party-scroll {
+    background: var(--paper-card);
+    padding: 2.5rem;
+    border: 1px solid rgba(26,26,26,0.1);
+    position: relative;
+    box-shadow: 10px 10px 0 rgba(0,0,0,0.05);
+}
+
+/* Red Seal effect */
+.party-scroll::after {
+    content: '絆';
+    position: absolute;
+    bottom: 20px; right: 20px;
+    width: 60px; height: 60px;
+    border: 3px solid var(--ink-red);
+    color: var(--ink-red);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 900;
+    opacity: 0.3;
+    pointer-events: none;
+    transform: rotate(10deg);
+}
+
+.party-name {
+    font-size: 1.8rem;
+    color: var(--ink-black);
+    margin-bottom: 0.5rem;
+    border-bottom: 2px solid var(--ink-red);
+    display: inline-block;
+    padding-bottom: 5px;
+}
+
+.party-members {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1.5rem 0;
+}
+
+.member-tag {
+    background: rgba(26,26,26,0.05);
+    padding: 3px 10px;
+    font-size: 0.85rem;
+    border: 1px solid rgba(26,26,26,0.1);
+}
+
+.raid-section {
+    margin-top: 6rem;
+    padding: 4rem;
+    background: #1a1a1a;
+    color: var(--bg-paper);
+    border: 4px double var(--gold);
+}
+
+.raid-roster {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.raid-team {
+    padding: 2rem;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.raid-team.white { border-left: 8px solid #ffffff; }
+.raid-team.yellow { border-left: 8px solid var(--gold); }
+.raid-team.fire { border-left: 8px solid #ff4d4d; }
+
+.raid-team h4 {
+    margin-bottom: 1.5rem;
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+}
+
+.anecdote-box {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(184, 134, 11, 0.1);
+    border-left: 3px solid var(--gold);
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--ink-light);
+}
+
+@media (max-width: 900px) {
+    .party-grid, .raid-roster { grid-template-columns: 1fr; }
+}
+
+/* --- Member Platform & Status --- */
+
+.platform-icon {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 1.2rem;
+    z-index: 10;
+}
+
+.platform-icon.youtube { color: #ff0000; }
+.platform-icon.twitch { color: #9146ff; }
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    font-family: 'Noto Serif JP', serif;
+    margin-right: 5px;
+    margin-top: 10px;
+    border: 1px solid;
+}
+
+.status-error {
+    background: rgba(139, 30, 40, 0.1);
+    border-color: var(--ink-red);
+    color: var(--ink-red);
+}
+
+.status-rest {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: var(--ink-light);
+    color: var(--ink-light);
+}
+
+.book-cover-content h3 {
+    margin-top: 10px;
+}

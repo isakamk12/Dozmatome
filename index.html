@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DoZ Archive | Doom or Zenith</title>
+    <!-- Google Fonts: Premium Serifs -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Serif+JP:wght@300;400;500;700&family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div class="vintage-overlay"></div>
+    
+    <div id="app" class="page-wrapper">
+        <nav class="navbar">
+            <div class="nav-content">
+                <h1 class="logo">DOOM OR ZENITH <span>ARCHIVE</span></h1>
+                <ul class="nav-links">
+                    <li><button class="nav-link active" data-view="story">THE TALE</button></li>
+                    <li><button class="nav-link" data-view="members">MEMBERS</button></li>
+                    <li><button class="nav-link" data-view="parties">ALLIANCES</button></li>
+                    <li><button class="nav-link" data-view="dungeon">WORLD</button></li>
+                    <li><button class="nav-link" data-view="bestiary">BESTIARY</button></li>
+                    <li><button class="nav-link" data-view="logs">CHRONICLES</button></li>
+                </ul>
+            </div>
+        </nav>
+
+        <main id="main-content">
+            <!-- Dynamic Content Injected by main.js -->
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2026 DoZ Archive. Fragments of a virtual epic.</p>
+        </footer>
+    </div>
+    
+    <script src="./main.js"></script>
+</body>
+</html>
