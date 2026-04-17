@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DoZ Archive | Doom or Zenith</title>
+    <!-- Google Fonts: Premium Serifs -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Serif+JP:wght@300;400;500;700&family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div class="vintage-overlay"></div>
+    
+    <div id="app" class="page-wrapper">
+        <nav class="navbar">
+            <div class="nav-content">
+                <h1 class="logo">DOOM OR ZENITH <span>ARCHIVE</span></h1>
+                <div class="nav-actions">
+                    <ul class="nav-links">
+                        <li><button class="nav-link active" data-view="story" data-i18n="nav.story">THE TALE</button></li>
+                        <li><button class="nav-link" data-view="members" data-i18n="nav.members">MEMBERS</button></li>
+                        <li><button class="nav-link" data-view="parties" data-i18n="nav.parties">ALLIANCES</button></li>
+                        <li><button class="nav-link" data-view="dungeon" data-i18n="nav.dungeon">WORLD</button></li>
+                        <li><button class="nav-link" data-view="bestiary" data-i18n="nav.bestiary">BESTIARY</button></li>
+                        <li><button class="nav-link" data-view="logs" data-i18n="nav.logs">CHRONICLES</button></li>
+                    </ul>
+                    <div class="lang-switch">
+                        <label class="sr-only" for="lang-select" data-i18n="lang.label">Language</label>
+                        <select id="lang-select" class="lang-select" aria-label="Language" data-i18n-aria-label="lang.label">
+                            <option value="ja" data-native="日本語">日本語</option>
+                            <option value="en" data-native="English">English</option>
+                            <option value="en-GB" data-native="English (UK)">English (UK)</option>
+                            <option value="en-AU" data-native="English (AU)">English (AU)</option>
+                            <option value="fr" data-native="Français">Français</option>
+                            <option value="fr-CA" data-native="Français (Canada)">Français (Canada)</option>
+                            <option value="de" data-native="Deutsch">Deutsch</option>
+                            <option value="ru" data-native="Русский">Русский</option>
+                            <option value="zh-CN" data-native="中文 (简体)">中文 (简体)</option>
+                            <option value="zh-TW" data-native="中文 (繁體)">中文 (繁體)</option>
+                            <option value="ko" data-native="한국어">한국어</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main id="main-content">
+            <!-- Dynamic Content Injected by main.js -->
+        </main>
+
+        <footer class="footer">
+            <p id="footer-text">&copy; 2026 DoZ Archive. Fragments of a virtual epic.</p>
+        </footer>
+    </div>
+    
+    <script type="module" src="./i18n.js"></script>
+    <script type="module" src="./main.js"></script>
+</body>
+</html>

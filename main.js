@@ -1,3 +1,118 @@
+const I18N_STRINGS = (typeof window !== 'undefined' && window.DOZ_I18N_STRINGS) ? window.DOZ_I18N_STRINGS : {};
+const SUPPORTED_LANGS = ['ja', 'en', 'en-GB', 'en-AU', 'fr', 'fr-CA', 'de', 'ru', 'zh-CN', 'zh-TW', 'ko'];
+
+function normalizeLang(lang) {
+    if (!lang) return 'ja';
+    const raw = String(lang);
+    const lowered = raw.toLowerCase();
+    if (lowered.startsWith('ja')) return 'ja';
+    if (lowered.startsWith('ko')) return 'ko';
+    if (lowered === 'zh-cn' || lowered === 'zh_cn' || lowered === 'zh-hans' || lowered.startsWith('zh-hans-')) return 'zh-CN';
+    if (lowered === 'zh-tw' || lowered === 'zh_tw' || lowered === 'zh-hant' || lowered.startsWith('zh-hant-')) return 'zh-TW';
+    if (lowered.startsWith('zh')) return 'zh-CN';
+    if (lowered.startsWith('ru')) return 'ru';
+    if (lowered.startsWith('de')) return 'de';
+    if (lowered === 'fr-ca' || lowered === 'fr_ca') return 'fr-CA';
+    if (lowered.startsWith('fr')) return 'fr';
+    if (lowered === 'en-gb' || lowered === 'en_gb') return 'en-GB';
+    if (lowered === 'en-au' || lowered === 'en_au') return 'en-AU';
+    if (lowered.startsWith('en')) return 'en';
+    return 'ja';
+}
+
+function getInitialLang() {
+    try {
+        const saved = localStorage.getItem('doz_lang');
+        if (saved) return normalizeLang(saved);
+    } catch { /* ignore */ }
+    return normalizeLang((typeof navigator !== 'undefined' && navigator.language) ? navigator.language : 'ja');
+}
+
+let currentLang = getInitialLang();
+
+function t(key, vars = {}) {
+    const langTable = I18N_STRINGS?.[currentLang] || {};
+    const fallbackTable = I18N_STRINGS?.en || {};
+    let raw = langTable[key] ?? fallbackTable[key] ?? key;
+    raw = String(raw);
+    return raw.replace(/\{(\w+)\}/g, (_, varName) => {
+        const value = vars[varName];
+        return value === undefined || value === null ? `{${varName}}` : String(value);
+    });
+}
+
+const LANG_LABEL_KEYS = {
+    ja: 'lang.ja',
+    en: 'lang.en',
+    'en-GB': 'lang.en_gb',
+    'en-AU': 'lang.en_au',
+    fr: 'lang.fr',
+    'fr-CA': 'lang.fr_ca',
+    de: 'lang.de',
+    ru: 'lang.ru',
+    'zh-CN': 'lang.zh_cn',
+    'zh-TW': 'lang.zh_tw',
+    ko: 'lang.ko'
+};
+
+function updateLangSelectOptionLabels() {
+    const select = document.getElementById('lang-select');
+    if (!select) return;
+
+    Array.from(select.options).forEach(option => {
+        const code = option.value;
+        const normalized = normalizeLang(code);
+        const nativeLabel = option.getAttribute('data-native') || option.textContent || code;
+        const key = LANG_LABEL_KEYS[normalized];
+        const localized = key ? t(key) : nativeLabel;
+
+        if (normalized === currentLang) {
+            option.textContent = nativeLabel;
+            return;
+        }
+        if (String(localized).trim() === String(nativeLabel).trim()) {
+            option.textContent = nativeLabel;
+            return;
+        }
+        option.textContent = `${nativeLabel} (${localized})`;
+    });
+}
+
+function applyI18nToDom(root = document) {
+    if (!root?.querySelectorAll) return;
+    root.querySelectorAll('[data-i18n], [data-i18n-html], [data-i18n-placeholder], [data-i18n-aria-label]').forEach(el => {
+        const textKey = el.getAttribute('data-i18n');
+        if (textKey) el.textContent = t(textKey);
+
+        const htmlKey = el.getAttribute('data-i18n-html');
+        if (htmlKey) el.innerHTML = t(htmlKey);
+
+        const placeholderKey = el.getAttribute('data-i18n-placeholder');
+        if (placeholderKey) el.setAttribute('placeholder', t(placeholderKey));
+
+        const ariaLabelKey = el.getAttribute('data-i18n-aria-label');
+        if (ariaLabelKey) el.setAttribute('aria-label', t(ariaLabelKey));
+    });
+}
+
+function setLang(lang, { rerender = true } = {}) {
+    currentLang = normalizeLang(lang);
+    try { localStorage.setItem('doz_lang', currentLang); } catch { /* ignore */ }
+
+    if (typeof document !== 'undefined') {
+        document.documentElement.lang = currentLang;
+        document.title = t('meta.title');
+
+        const footer = document.getElementById('footer-text');
+        if (footer) footer.innerHTML = t('footer.textHtml', { year: new Date().getFullYear() });
+
+        applyI18nToDom(document);
+        updateLangSelectOptionLabels();
+    }
+
+    if (rerender && typeof render === 'function') render();
+}
+
 const DATA = {
     system: {
         title: "Doom or Zenith - Full Archive",
@@ -287,26 +402,24 @@ function renderStory(container) {
     container.innerHTML = `
         <div class="section-wrapper">
             <header class="hero-section reveal">
-                <span class="chapter-num">Prologue</span>
+                <span class="chapter-num">${t('story.chapter')}</span>
                 <h1 class="glow-text">DOOM or ZENITH</h1>
-                <p class="subtitle italic" style="letter-spacing: 5px; color: var(--ink-light);">ARCHIVE OF THE 150 SOULS</p>
+                <p class="subtitle italic" style="letter-spacing: 5px; color: var(--ink-light);">${t('story.archiveSubtitle')}</p>
                 <div class="hero-actions">
-                    <button class="next-chapter-btn" onclick="switchView('logs')"><i class="fa-solid fa-feather-pointed"></i>日誌を紐解く</button>
-                    <button class="btn-secondary" onclick="switchView('bestiary')">魔物図鑑を閲覧</button>
+                    <button class="next-chapter-btn" onclick="switchView('logs')"><i class="fa-solid fa-feather-pointed"></i>${t('story.openLogs')}</button>
+                    <button class="btn-secondary" onclick="switchView('bestiary')">${t('story.openBestiary')}</button>
                 </div>
             </header>
             <section class="reveal" style="margin-bottom: 8rem;">
                 <div class="narrative-box">
                     <p class="narrative-text">
-                        ドズル社が提供する、一回きりのMMORPGイベント「DoZ」。<br>
-                        そこに集った150名の配信者たちは、全10層からなる巨塔の頂を目指し、それぞれの物語を刻んだ。<br>
-                        これは、絶望の深淵と、頂上で見た栄光の記録。
+                        ${t('story.narrativeHtml')}
                     </p>
                 </div>
             </section>
             <div class="next-phase-footer reveal">
                 <button class="next-chapter-btn" onclick="switchView('members')">
-                    150名の冒険者リストへ <i class="fa-solid fa-arrow-right"></i>
+                    ${t('story.toMembers')} <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
         </div>
@@ -317,11 +430,11 @@ function renderMembers(container) {
     container.innerHTML = `
         <div class="section-wrapper">
             <div class="chapter-header reveal">
-                <span class="chapter-num">Registry</span>
-                <h2 class="section-title">ADVENTURER LIST</h2>
+                <span class="chapter-num">${t('members.chapter')}</span>
+                <h2 class="section-title">${t('members.title')}</h2>
             </div>
             <div class="search-container reveal">
-                <input type="text" id="m-search" class="premium-search" placeholder="勇者の名を探す...">
+                <input type="text" id="m-search" class="premium-search" placeholder="${t('members.searchPlaceholder')}">
             </div>
             <div class="book-grid" id="m-list">
                 ${DATA.members.map(m => `
@@ -339,8 +452,8 @@ function renderMembers(container) {
                             </div>
                             <div class="book-inside">
                                 <div class="book-page-content">
-                                    <h4>Profile Data</h4>
-                                    <p><b>Platform:</b> ${m.platform}</p>
+                                    <h4>${t('members.profileData')}</h4>
+                                    <p><b>${t('members.platform')}:</b> ${m.platform}</p>
                                     <div style="margin-top: 10px;">
                                         ${m.status.map(s => `
                                             <span class="status-badge ${s.includes('error') ? 'status-error' : 'status-rest'}">
@@ -357,7 +470,7 @@ function renderMembers(container) {
             </div>
             <div class="next-phase-footer reveal">
                 <button class="next-chapter-btn" onclick="switchView('parties')">
-                    結ばれた絆：パーティーアーカイブへ <i class="fa-solid fa-arrow-right"></i>
+                    ${t('members.toParties')} <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
         </div>
@@ -369,8 +482,8 @@ function renderParties(container) {
     container.innerHTML = `
         <div class="section-wrapper">
             <div class="chapter-header reveal">
-                <span class="chapter-num">Alliances</span>
-                <h2 class="section-title">THE BONDS OF 150</h2>
+                <span class="chapter-num">${t('parties.chapter')}</span>
+                <h2 class="section-title">${t('parties.title')}</h2>
             </div>
 
             <div class="party-grid">
@@ -388,15 +501,15 @@ function renderParties(container) {
             </div>
 
             <div class="raid-section reveal">
-                <h3 style="font-family: 'Cinzel'; text-align: center; font-size: 2rem;">THE GREAT RAID: ZEPHYRUS</h3>
+                <h3 style="font-family: 'Cinzel'; text-align: center; font-size: 2rem;">${t('parties.greatRaid')}</h3>
                 <p style="text-align: center; font-style: italic; margin-top: 1rem; color: var(--gold);">${DATA.raid.meta}</p>
                 <div class="raid-roster">
-                    ${DATA.raid.teams.map(t => `
-                        <div class="raid-team ${t.color}">
-                            <h4>${t.name}</h4>
-                            <p style="font-size: 0.8rem; margin-bottom: 10px; color: var(--gold);">LEADER: ${t.leader}</p>
-                            <p style="font-size: 0.85rem; line-height: 1.6;">${t.members}</p>
-                            <p style="margin-top: 15px; font-size: 0.75rem; opacity: 0.7;"><b>IDENTIFIER:</b> ${t.note}</p>
+                    ${DATA.raid.teams.map(team => `
+                        <div class="raid-team ${team.color}">
+                            <h4>${team.name}</h4>
+                            <p style="font-size: 0.8rem; margin-bottom: 10px; color: var(--gold);">${t('parties.leader')}: ${team.leader}</p>
+                            <p style="font-size: 0.85rem; line-height: 1.6;">${team.members}</p>
+                            <p style="margin-top: 15px; font-size: 0.75rem; opacity: 0.7;"><b>${t('parties.identifier')}:</b> ${team.note}</p>
                         </div>
                     `).join('')}
                 </div>
@@ -404,7 +517,7 @@ function renderParties(container) {
 
             <div class="next-phase-footer reveal">
                 <button class="next-chapter-btn" onclick="switchView('dungeon')">
-                    彼らが挑んだ巨塔：世界録へ <i class="fa-solid fa-arrow-right"></i>
+                    ${t('parties.toDungeon')} <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
         </div>
@@ -414,9 +527,9 @@ function renderParties(container) {
 function renderBestiary(container) {
     container.innerHTML = `
         <div class="section-wrapper">
-            <div class="chapter-header reveal"><span class="chapter-num">Bestiary</span><h2 class="section-title">DOOM'S GUARDIANS</h2></div>
+            <div class="chapter-header reveal"><span class="chapter-num">${t('bestiary.chapter')}</span><h2 class="section-title">${t('bestiary.title')}</h2></div>
             <div class="acronym-reveal-box reveal">
-                <p style="font-family: 'Cormorant Garamond'; letter-spacing: 4px; margin-bottom: 1rem;">DECODED ARCHIVE</p>
+                <p style="font-family: 'Cormorant Garamond'; letter-spacing: 4px; margin-bottom: 1rem;">${t('bestiary.decodedArchive')}</p>
                 <div class="acronym-display"><span>D</span><span>O</span><span>O</span><span>M</span></div>
                 <p style="margin-top: 1rem; color: var(--gold);">Diabolos // Osiris // Odin // Moloch</p>
             </div>
@@ -424,18 +537,18 @@ function renderBestiary(container) {
                 ${DATA.bestiary.map(b => `
                     <div class="bestiary-scroll reveal ${b.floor === 6 ? 'echidna-corrupted' : (b.floor === 7 ? 'nemesis-storm' : (b.floor === 8 ? 'quiz-golden' : ''))}">
                         <div class="boss-header">
-                            <div><span class="chapter-num">Floor ${b.floor}</span><h3>${highlightInitial(b.name, b.floor <= 4)}</h3><p class="subtitle italic" style="color: var(--ink-red); text-transform: uppercase;">${b.title}</p></div>
-                            <div class="boss-id-wrap"><div style="font-family: 'Cormorant Garamond'; font-size: 0.9rem;">DAY ${b.day}</div><div style="font-size: 0.8rem; margin-top: 5px;">STATUS: ARRESTED</div></div>
+                            <div><span class="chapter-num">${t('bestiary.floor', { floor: b.floor })}</span><h3>${highlightInitial(b.name, b.floor <= 4)}</h3><p class="subtitle italic" style="color: var(--ink-red); text-transform: uppercase;">${b.title}</p></div>
+                            <div class="boss-id-wrap"><div style="font-family: 'Cormorant Garamond'; font-size: 0.9rem;">${t('bestiary.day', { day: b.day })}</div><div style="font-size: 0.8rem; margin-top: 5px;">${t('bestiary.statusArrested')}</div></div>
                         </div>
                         <div class="boss-meta-grid">
-                            <div><h4 style="margin-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.1);">Gimmicks</h4><ul class="gimmick-list">${b.gimmicks.map(g => `<li>${g}</li>`).join('')}</ul></div>
-                            <div><h4 style="margin-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.1);">Research</h4><div class="strategy-note">${b.strategy}</div><p style="margin-top: 1.5rem; font-size: 0.9rem; color: var(--ink-light);"><b>Archives:</b> ${b.notes}</p></div>
+                            <div><h4 style="margin-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.1);">${t('bestiary.gimmicks')}</h4><ul class="gimmick-list">${b.gimmicks.map(g => `<li>${g}</li>`).join('')}</ul></div>
+                            <div><h4 style="margin-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.1);">${t('bestiary.research')}</h4><div class="strategy-note">${b.strategy}</div><p style="margin-top: 1.5rem; font-size: 0.9rem; color: var(--ink-light);"><b>${t('bestiary.archives')}:</b> ${b.notes}</p></div>
                         </div>
                     </div>
                 `).join('')}
             </div>
             <div class="next-phase-footer reveal">
-                <button class="next-chapter-btn" onclick="switchView('logs')">動乱の歴史：デイリーログへ <i class="fa-solid fa-arrow-right"></i></button>
+                <button class="next-chapter-btn" onclick="switchView('logs')">${t('bestiary.toLogs')} <i class="fa-solid fa-arrow-right"></i></button>
             </div>
         </div>
     `;
@@ -444,24 +557,24 @@ function renderBestiary(container) {
 function renderDungeon(container) {
     container.innerHTML = `
         <div class="section-wrapper">
-            <div class="chapter-header reveal"><span class="chapter-num">World</span><h2 class="section-title">調査報告録: 謎の塔</h2></div>
+            <div class="chapter-header reveal"><span class="chapter-num">${t('dungeon.chapter')}</span><h2 class="section-title">${t('dungeon.title')}</h2></div>
             <div class="grid-2col reveal" style="margin-bottom: 4rem;">
-                <div class="manifest-box"><h4>生存の掟</h4><ul style="list-style: none;">${DATA.dungeon.manifesto.map(m => `<li><b style="color: var(--ink-red);">■ ${m.title}</b><br>${m.content}</li>`).join('')}</ul></div>
-                <div class="manifest-box"><h4>街の秘密</h4><ul style="list-style: none;">${DATA.dungeon.secrets.map(s => `<li><i class="fa-solid fa-key" style="color: var(--gold);"></i> <b>${s.place}</b>: ${s.info}</li>`).join('')}</ul><div class="secret-stamp">CONFIDENTIAL</div></div>
+                <div class="manifest-box"><h4>${t('dungeon.survivalRules')}</h4><ul style="list-style: none;">${DATA.dungeon.manifesto.map(m => `<li><b style="color: var(--ink-red);">■ ${m.title}</b><br>${m.content}</li>`).join('')}</ul></div>
+                <div class="manifest-box"><h4>${t('dungeon.citySecrets')}</h4><ul style="list-style: none;">${DATA.dungeon.secrets.map(s => `<li><i class="fa-solid fa-key" style="color: var(--gold);"></i> <b>${s.place}</b>: ${s.info}</li>`).join('')}</ul><div class="secret-stamp">${t('dungeon.confidential')}</div></div>
             </div>
             <div class="dungeon-reports">
                 ${DATA.dungeon.floors.map(f => `
                     <div class="dungeon-blueprint reveal">
-                        <div class="floor-badge">FLOOR ${f.level}</div><h3>${f.name}</h3><p style="font-style: italic; color: var(--ink-red); margin-bottom: 2rem;">CONCEPT: ${f.concept}</p>
+                        <div class="floor-badge">${t('dungeon.floor', { floor: f.level })}</div><h3>${f.name}</h3><p style="font-style: italic; color: var(--ink-red); margin-bottom: 2rem;">${t('dungeon.concept')}: ${f.concept}</p>
                         <div class="grid-2col">
-                            <div><h4 style="font-size: 1rem;">Detected Mobs</h4><p style="font-size: 0.9rem;">${f.mobs}</p><h4 style="font-size: 1rem;">Identified Gimmicks</h4>${f.gimmicks.map(g => `<div><span class="gimmick-tag">${g.tag}</span><p style="font-size: 0.85rem;">${g.desc}</p></div>`).join('')}</div>
-                            <div><h4 style="font-size: 1rem;">Surveyor's Notes</h4><div class="strategy-note">${f.notes}</div></div>
+                            <div><h4 style="font-size: 1rem;">${t('dungeon.detectedMobs')}</h4><p style="font-size: 0.9rem;">${f.mobs}</p><h4 style="font-size: 1rem;">${t('dungeon.identifiedGimmicks')}</h4>${f.gimmicks.map(g => `<div><span class="gimmick-tag">${g.tag}</span><p style="font-size: 0.85rem;">${g.desc}</p></div>`).join('')}</div>
+                            <div><h4 style="font-size: 1rem;">${t('dungeon.surveyorsNotes')}</h4><div class="strategy-note">${f.notes}</div></div>
                         </div>
                     </div>
                 `).join('')}
             </div>
             <div class="next-phase-footer reveal">
-                <button class="next-chapter-btn" onclick="switchView('bestiary')">守護者：魔物録へ <i class="fa-solid fa-arrow-right"></i></button>
+                <button class="next-chapter-btn" onclick="switchView('bestiary')">${t('dungeon.toBestiary')} <i class="fa-solid fa-arrow-right"></i></button>
             </div>
         </div>
     `;
@@ -470,14 +583,14 @@ function renderDungeon(container) {
 function renderLogs(container) {
     container.innerHTML = `
         <div class="section-wrapper">
-            <div class="chapter-header reveal"><span class="chapter-num">Chronicles</span><h2 class="section-title">DAILY LOGS</h2></div>
+            <div class="chapter-header reveal"><span class="chapter-num">${t('logs.chapter')}</span><h2 class="section-title">${t('logs.title')}</h2></div>
             <div class="log-list">
                 ${DATA.logs.map(log => `
                     <div class="log-card reveal"><h3>Vol. ${log.day}: ${log.title}</h3><p style="margin-bottom: 2rem; font-weight: 500;">${log.topic}</p><p class="narrative-text">${log.content}</p>
                     ${log.episodes.length > 0 ? `<div class="episode-list">${log.episodes.map(e => `<div class="episode-item"><strong>${e.title}</strong><p style="font-size: 0.95rem; color: var(--ink-light);">${e.desc}</p></div>`).join('')}</div>` : ''}</div>
                 `).join('')}
             </div>
-            <div class="next-phase-footer reveal"><button class="next-chapter-btn" onclick="switchView('story')">プロローグへ戻る <i class="fa-solid fa-rotate-left"></i></button></div>
+            <div class="next-phase-footer reveal"><button class="next-chapter-btn" onclick="switchView('story')">${t('logs.backToPrologue')} <i class="fa-solid fa-rotate-left"></i></button></div>
         </div>
     `;
 }
@@ -517,5 +630,13 @@ function setupInkStroke() {
 
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.nav-links .nav-link').forEach(b => b.onclick = () => switchView(b.dataset.view));
+
+    const langSelect = document.getElementById('lang-select');
+    if (langSelect) {
+        langSelect.value = currentLang;
+        langSelect.addEventListener('change', () => setLang(langSelect.value));
+    }
+    setLang(currentLang, { rerender: false });
+
     setupInkStroke(); render();
 });
