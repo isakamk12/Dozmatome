@@ -3,12 +3,12 @@ const DATA = {
         title: "Doom or Zenith - Full Archive",
         lore: "Dozel Corp. MMORPG Event 'DoZ'. 150 streamers unite to conquer a 10-floor tower.",
         jobs: [
-            { type: "Combat", name: "Knight", desc: "高い防御力と生存能力を持つ前線の壁。ヘイト管理を担当。" },
-            { type: "Combat", name: "Wizard", desc: "強力な範囲魔法で敵を殲滅する火力職。" },
-            { type: "Combat", name: "Healer", desc: "味方の傷を癒やし、聖なる力で支援する。Lv40で『リザレクション』を習得。" },
-            { type: "Combat", name: "Archer", desc: "遠距離から的確に弱点を射抜く狙撃手。" },
-            { type: "Combat", name: "Monk", desc: "素早い連撃と独特のスキルで戦場を翻弄する。" },
-            { type: "Combat", name: "Rogue", desc: "隠密とクリティカルに特化したアタッカー。Lv40で『覚醒』する。" }
+            { type: "Combat", name: "Knight", desc: "高い防御力と生存能力を持つ前線の壁。ヘイト管理が7層ボス等の攻略に不可欠。" },
+            { type: "Combat", name: "Wizard", desc: "火力職。スロー魔法による足止めが上位層で極めて重要に。" },
+            { type: "Combat", name: "Healer", desc: "味方の支援役。リザレクションに加え、上位層ではデバフ解除の重要性が増大。" },
+            { type: "Combat", name: "Archer", desc: "遠距離狙撃手。スキル『スロー』の付与が6層以降の必須条件となっている。" },
+            { type: "Combat", name: "Monk", desc: "素早い連撃。ギミックの相性により6日目時点で『受難』と呼ばれるほどの苦境に。" },
+            { type: "Combat", name: "Rogue", desc: "隠密アタッカー。覚醒後の火力は高いが、立ち回りに高い技術を要する。" }
         ]
     },
     logs: [
@@ -49,6 +49,28 @@ const DATA = {
             topic: "4日目：ホワイトバスと最前線の絶望『エキドナ』", 
             content: "モロクのデバフ対策として『ホワイトバス』が発見される。Lv40スキルの解放。しかし、第6層『エキドナ』という未曾有の壁が立ちはだかる。",
             episodes: []
+        },
+        { 
+            day: 5, 
+            title: "Day 5: The Stalemate",
+            topic: "5日目：折り返し地点と、第7層の「沈黙」", 
+            content: "第6層ボス『エキドナ』が最大のスタッパーとして君臨。最前線は第7層に到達するも、石像と即死の猛攻により1日を通してクリア者ゼロという異常事態に。",
+            episodes: [
+                { title: "第6層ボスでの大スタック", desc: "スロー（鈍足）スキルの維持と、アーチャー複数編成によるヘイト管理の重要性が認識され、攻略の鍵となった。" },
+                { title: "第5層大規模レイド", desc: "最大18人、フルパーティー同士が手を取り合うお祭り騒ぎ。一方でサーバーダウンなどのトラブルも発生。" },
+                { title: "カジノ新要素と1.2倍お守り", desc: "『ちんちろ』解禁。50万ドズで買える経験値ブーストお守りにより、Lv60を目指すレベリングが加速。" }
+            ]
+        },
+        { 
+            day: 6, 
+            title: "Day 6: Breaking the Storm",
+            topic: "6日目：7層突破と、モンクの受難", 
+            content: "第7層ボス『ネメシス』の攻略法が確立。ついに最前線が第8層（ミニゲームの階層）へ。一方で物理近接職、特にモンクには冬の時代が訪れる。",
+            episodes: [
+                { title: "第7層ボス『ネメシス』討伐", desc: "石像破壊ギミックの解明と、絶え間ないレベリングによるステータス暴力で、モノパスを筆頭に突破チームが続出。" },
+                { title: "モンクの転職ラッシュ", desc: "ギミック相性の悪さから『モンクの受難』が話題に。ナイトやアーチャーへ転職し、攻略に最適化した構成への再編が進む。" },
+                { title: "第8層：ミニゲームの試練", desc: "辿り着いた第8層はこれまでと一変。クイズなどの特殊ギミックが待ち受け、一時の休息と新たな困惑を与える。" }
+            ]
         }
     ],
     members: [
@@ -213,7 +235,9 @@ const DATA = {
         { floor: 3, name: "雪山の暴君 オーディン", title: "Tyrant of the Snow Mountain", day: 2, gimmicks: ["氷のつらら", "馬の突進", "無敵モード"], strategy: "炎属性・毒DoTが特効。", notes: "オーディンの宝玉ドロップ。" },
         { floor: 4, name: "煉獄 of Purgatory", day: 3, gimmicks: ["回復減衰デバフ", "雑魚召喚(回復阻止)", "隕石落下"], strategy: "ホワイトバス・手榴弾で対策。", notes: "チェスパズルの後。" },
         { floor: 5, name: "嵐の王 ゼピュロス", title: "The Wind Raid Lord", day: 3, gimmicks: ["18人レイド制限", "50体生贄入場", "生命の樹破壊"], strategy: "18人合同軍による3面同時展開。", notes: "詳細はALLIANCES項参照。" },
-        { floor: 6, name: "万魔の母 エキドナ", title: "Mother of All Monsters", day: 4, gimmicks: ["圧倒的火力", "呪いの鎖爆発", "取り巻き連動HP"], strategy: "現在攻略中。絶望の難易度。", notes: "最前線が20連敗。" }
+        { floor: 6, name: "万魔の母 エキドナ", title: "Mother of All Monsters", day: 4, gimmicks: ["圧倒的火力", "呪いの鎖爆発", "取り巻き連動HP"], strategy: "スロー維持と徹底したヘイト管理。アーチャー複数編成が主流。", notes: "6日目時点で多くのチームが突破。" },
+        { floor: 7, name: "復讐の女神 ネメシス", title: "The Goddess of Revenge", day: 5, gimmicks: ["雷属性の範囲攻撃", "職業別石像の破壊", "即死フィールド"], strategy: "自身の職の石像を迅速に壊す連携。Lv60スキルの解禁が突破口。", notes: "モノパスが世界最速突破。" },
+        { floor: 8, name: "知識の守護者 クイズマスター", title: "The Riddle Sentinel", day: 6, gimmicks: ["4択クイズ", "ミニゲーム", "反射神経試練"], strategy: "知識の共有と協力。戦闘以外の能力が試される。", notes: "一時のレクリエーション階層。" }
     ],
     dungeon: {
         manifesto: [
@@ -228,7 +252,9 @@ const DATA = {
             { level: 3, name: "FROZEN", concept: "雪山のオープンフィールド", mobs: "氷騎士等", gimmicks: [{ tag: "ROUTE", desc: "外周走破が正解。" }], notes: "ボスは氷の神殿。" },
             { level: 4, name: "VOLCANO", concept: "マグマとチェス", mobs: "フレアガルーダ等", gimmicks: [{ tag: "CHESS", desc: "万丈の試練。"}, { tag: "MAGMA", desc: "スニーク無効化。"}], notes: "キャラコン必須の崖登り。" },
             { level: 5, name: "FOUR SEASONS", concept: "和風四季エリア", mobs: "レアモブ『経験値』", gimmicks: [{ tag: "RAID", desc: "12-18人合同必須。"}], notes: "五重の塔が目印。" },
-            { level: 6, name: "HELLSCAPE", concept: "地獄の空洞", mobs: "ケルベロス等", gimmicks: [{ tag: "SACRIFICE", desc: "50体生贄誘導。"}], notes: "不気味な半熟卵。" }
+            { level: 6, name: "HELLSCAPE", concept: "地獄の空洞", mobs: "ケルベロス等", gimmicks: [{ tag: "SACRIFICE", desc: "50体生贄誘導。"}], notes: "不気味な半熟卵。魔の6層と呼ばれる。" },
+            { level: 7, name: "TEMPEST", concept: "雷鳴と裁きの回廊", mobs: "雷精、リベンジャー等", gimmicks: [{ tag: "STATUE", desc: "職別の石像ギミック。"}, { tag: "BOLT", desc: "不可避の雷撃。"}], notes: "5日目の沈黙を呼んだ難関。" },
+            { level: 8, name: "ENTERTAINMENT", concept: "黄金の遊戯場", mobs: "なし(平和？)", gimmicks: [{ tag: "QUIZ", desc: "死の4択。"}, { tag: "GAME", desc: "一発勝負のミニゲーム。"}], notes: "カジノとは別のギャンブル感。" }
         ],
         secrets: [
             { place: "釣り場裏", info: "隠しボタン1" },
@@ -396,7 +422,7 @@ function renderBestiary(container) {
             </div>
             <div class="bestiary-list">
                 ${DATA.bestiary.map(b => `
-                    <div class="bestiary-scroll reveal ${b.floor === 6 ? 'echidna-corrupted' : ''}">
+                    <div class="bestiary-scroll reveal ${b.floor === 6 ? 'echidna-corrupted' : (b.floor === 7 ? 'nemesis-storm' : (b.floor === 8 ? 'quiz-golden' : ''))}">
                         <div class="boss-header">
                             <div><span class="chapter-num">Floor ${b.floor}</span><h3>${highlightInitial(b.name, b.floor <= 4)}</h3><p class="subtitle italic" style="color: var(--ink-red); text-transform: uppercase;">${b.title}</p></div>
                             <div class="boss-id-wrap"><div style="font-family: 'Cormorant Garamond'; font-size: 0.9rem;">DAY ${b.day}</div><div style="font-size: 0.8rem; margin-top: 5px;">STATUS: ARRESTED</div></div>

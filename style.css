@@ -493,6 +493,52 @@ h1, h2, h3, h4, .logo, .badge {
     99% { transform: skew(1deg); }
 }
 
+/* Nemesis Storm Effect */
+.nemesis-storm {
+    background: #1a1a2e;
+    color: #e0e0ff;
+    border-color: #483d8b;
+    box-shadow: 0 0 30px rgba(72, 61, 139, 0.3);
+    overflow: hidden;
+}
+
+.nemesis-storm h3 {
+    color: #b39ddb;
+    text-shadow: 0 0 10px rgba(179, 157, 219, 0.5);
+}
+
+.nemesis-storm::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(45deg, transparent 45%, rgba(135, 206, 250, 0.1) 50%, transparent 55%);
+    background-size: 200% 200%;
+    animation: lightningShift 8s infinite;
+    pointer-events: none;
+}
+
+@keyframes lightningShift {
+    0% { background-position: 200% 0; }
+    10% { background-position: -200% 0; opacity: 1; }
+    11% { opacity: 0; }
+    100% { opacity: 0; }
+}
+
+/* Quiz Golden Effect */
+.quiz-golden {
+    background: #fff8e1;
+    border: 2px solid #ffd700;
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.15);
+}
+
+.quiz-golden h3 {
+    color: #b8860b;
+}
+
+.quiz-golden .boss-header {
+    border-bottom-color: #ffd700;
+}
+
 /* Acronym Reveal Box */
 .acronym-reveal-box {
     background: var(--ink-black);
