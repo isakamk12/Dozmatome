@@ -6,6 +6,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export default defineConfig({
+  // Use relative asset paths so the built site works under subpaths
+  // (e.g. GitHub Pages) and when opened from different base URLs.
+  base: './',
   server: {
     open: '/index.vite.html'
   },
@@ -17,4 +20,3 @@ export default defineConfig({
     }
   }
 });
-

@@ -1,4 +1,8 @@
-const I18N_STRINGS = (typeof window !== 'undefined' && window.DOZ_I18N_STRINGS) ? window.DOZ_I18N_STRINGS : {};
+function getI18nStrings() {
+    if (typeof window === 'undefined') return {};
+    const table = window.DOZ_I18N_STRINGS;
+    return table && typeof table === 'object' ? table : {};
+}
 const SUPPORTED_LANGS = ['ja', 'en', 'en-GB', 'en-AU', 'fr', 'fr-CA', 'de', 'ru', 'zh-CN', 'zh-TW', 'ko'];
 
 function normalizeLang(lang) {
@@ -25,14 +29,16 @@ function getInitialLang() {
         const saved = localStorage.getItem('doz_lang');
         if (saved) return normalizeLang(saved);
     } catch { /* ignore */ }
-    return normalizeLang((typeof navigator !== 'undefined' && navigator.language) ? navigator.language : 'ja');
+    // Default to Japanese unless the user explicitly selects another language.
+    return 'ja';
 }
 
 let currentLang = getInitialLang();
 
 function t(key, vars = {}) {
-    const langTable = I18N_STRINGS?.[currentLang] || {};
-    const fallbackTable = I18N_STRINGS?.en || {};
+    const strings = getI18nStrings();
+    const langTable = strings?.[currentLang] || {};
+    const fallbackTable = strings?.en || {};
     let raw = langTable[key] ?? fallbackTable[key] ?? key;
     raw = String(raw);
     return raw.replace(/\{(\w+)\}/g, (_, varName) => {
@@ -113,229 +119,23 @@ function setLang(lang, { rerender = true } = {}) {
     if (rerender && typeof render === 'function') render();
 }
 
-const DATA = {
-    system: {
-        title: "Doom or Zenith - Full Archive",
-        lore: "Dozel Corp. MMORPG Event 'DoZ'. 150 streamers unite to conquer a 10-floor tower.",
-        jobs: [
-            { type: "Combat", name: "Knight", desc: "高い防御力と生存能力を持つ前線の壁。ヘイト管理が7層ボス等の攻略に不可欠。" },
-            { type: "Combat", name: "Wizard", desc: "火力職。スロー魔法による足止めが上位層で極めて重要に。" },
-            { type: "Combat", name: "Healer", desc: "味方の支援役。リザレクションに加え、上位層ではデバフ解除の重要性が増大。" },
-            { type: "Combat", name: "Archer", desc: "遠距離狙撃手。スキル『スロー』の付与が6層以降の必須条件となっている。" },
-            { type: "Combat", name: "Monk", desc: "素早い連撃。ギミックの相性により6日目時点で『受難』と呼ばれるほどの苦境に。" },
-            { type: "Combat", name: "Rogue", desc: "隠密アタッカー。覚醒後の火力は高いが、立ち回りに高い技術を要する。" }
-        ]
-    },
-    logs: [
-        { 
-            day: 1, 
-            title: "Day 1: Genesis",
-            topic: "1日目：ディアボロスの洗礼とゴミ拾いメタ", 
-            content: "サーバーオープン直後の大混乱。第1層ボス『ディアボロス』による絶望。そして『ゴミ釣り』という独自のレベリング文化の誕生。",
-            episodes: [
-                { title: "ドズル社ガチ攻略パーティー", desc: "ドズルを中心に、おんりー、トントン、チーノ、なな湖、ヒカックが集結。職業バランスを重視した完璧な布陣でスタートを切る。" },
-                { title: "モノパス（チームスマイル）", desc: "シャークん、Akira、スマイル、ピヤノの4名。圧倒的なセンスでサーバー初の第1層ボス討伐を成し遂げた。" },
-                { title: "チームゴミ収集（トリプルA）", desc: "まぐにぃ、はこたろー、まさのりchらが『召喚の笛』を狙ってゴミを回収。爆速レベリング手法を確立。" }
-            ]
-        },
-        { 
-            day: 2, 
-            title: "Day 2: The Labyrinth",
-            topic: "2日目：死の迷宮と雪山の暴君オーディン", 
-            content: "第2層の広大な迷宮に苦しむ冒険者たち。トロフィー納品が必要な『オシリス』戦。そして雪山の強敵『オーディン』との2時間に及ぶ死闘。",
-            episodes: [
-                { title: "「花盛りの君たちへ（#花君）」", desc: "小清水透、椎名唯華、奈羅花、ニコラ、家入ポポ、トラゾー。和気あいあいと迷路を攻略する女子＋トラゾーパーティー。" },
-                { title: "神父28さんの祈り", desc: "教会に常駐し、無償で蘇生し続けるロールプレイ。多くのPTを陰から支える聖域となった。" }
-            ]
-        },
-        { 
-            day: 3, 
-            title: "Day 3: The Great Raid",
-            topic: "3日目：カジノ解禁と、18人レイドボス『ゼピュロス』", 
-            content: "カジノの実装によるギャンブルの狂気。最大18人で挑む『ゼピュロス』レイド。称号の色（緑・白・黄）による大規模な陣形連携。",
-            episodes: [
-                { title: "18人合同レイド（緑・白・黄）", desc: "叶、Kamito、たけぉ、しるこ、まさのりらの大集結。色分けによる陣形指揮で巨悪に挑む。" },
-                { title: "プッシュマンの暗躍", desc: "隠しボタンの座標情報を売買するビジネスが誕生し、探索が加速した。" }
-            ]
-        },
-        { 
-            day: 4, 
-            title: "Day 4: The Wall",
-            topic: "4日目：ホワイトバスと最前線の絶望『エキドナ』", 
-            content: "モロクのデバフ対策として『ホワイトバス』が発見される。Lv40スキルの解放。しかし、第6層『エキドナ』という未曾有の壁が立ちはだかる。",
-            episodes: []
-        },
-        { 
-            day: 5, 
-            title: "Day 5: The Stalemate",
-            topic: "5日目：折り返し地点と、第7層の「沈黙」", 
-            content: "第6層ボス『エキドナ』が最大のスタッパーとして君臨。最前線は第7層に到達するも、石像と即死の猛攻により1日を通してクリア者ゼロという異常事態に。",
-            episodes: [
-                { title: "第6層ボスでの大スタック", desc: "スロー（鈍足）スキルの維持と、アーチャー複数編成によるヘイト管理の重要性が認識され、攻略の鍵となった。" },
-                { title: "第5層大規模レイド", desc: "最大18人、フルパーティー同士が手を取り合うお祭り騒ぎ。一方でサーバーダウンなどのトラブルも発生。" },
-                { title: "カジノ新要素と1.2倍お守り", desc: "『ちんちろ』解禁。50万ドズで買える経験値ブーストお守りにより、Lv60を目指すレベリングが加速。" }
-            ]
-        },
-        { 
-            day: 6, 
-            title: "Day 6: Breaking the Storm",
-            topic: "6日目：7層突破と、モンクの受難", 
-            content: "第7層ボス『ネメシス』の攻略法が確立。ついに最前線が第8層（ミニゲームの階層）へ。一方で物理近接職、特にモンクには冬の時代が訪れる。",
-            episodes: [
-                { title: "第7層ボス『ネメシス』討伐", desc: "石像破壊ギミックの解明と、絶え間ないレベリングによるステータス暴力で、モノパスを筆頭に突破チームが続出。" },
-                { title: "モンクの転職ラッシュ", desc: "ギミック相性の悪さから『モンクの受難』が話題に。ナイトやアーチャーへ転職し、攻略に最適化した構成への再編が進む。" },
-                { title: "第8層：ミニゲームの試練", desc: "辿り着いた第8層はこれまでと一変。クイズなどの特殊ギミックが待ち受け、一時の休息と新たな困惑を与える。" }
-            ]
-        }
-    ],
-    members: [
-        { "name": "ドズル", "affiliation": "ドズル社", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "ぼんじゅうる", "affiliation": "ドズル社", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "おんりー", "affiliation": "ドズル社", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "おらふくん", "affiliation": "ドズル社", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "おおはらMEN", "affiliation": "ドズル社", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "ネコおじ", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: NB error"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: NB error" },
-        { "name": "赤髪のとも", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "あきピヨ", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "福井のカズさん", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "さかいさんだー", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "まぐにぃ", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: NB error"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: NB error" },
-        { "name": "メッス", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "まろ", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: NB error"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: NB error" },
-        { "name": "アマル", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: Rest"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: Rest" },
-        { "name": "AlphaAzur", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: Rest"], "role": "Adventurer", "note": "DoZ参加者アーカイブ. Note: Rest" },
-        { "name": "rpr", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "おなつのにびたし", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "Kamito", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "KAWAIICLUB", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "ギルくん", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "金豚きょー", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "黒炭酸", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "けっつん", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "じゃじゃまる", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "しょぼすけ", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "しろまんた", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "げんぴょん", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "たらこ", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "んそめ", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "ごんかね", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "緑色(みどりくん)", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "だいだら", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "たけぉ", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: NB error"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: NB error" },
-        { "name": "ちーの", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "茶々茶", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: NB error"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: NB error" },
-        { "name": "天開司", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "トナカイト(ヘンディー)", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "なな湖", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: Rest"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: Rest" },
-        { "name": "ニコラ･クラエス", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "寧々丸", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "のばまん", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "ハセシン", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: Rest"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: Rest" },
-        { "name": "ぴくと", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "日向まる", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "ひょう太朗", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "28", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "まさのりch", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "marunnn", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "みつき", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "最高コーラ", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "ゆふな", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "猫麦とろろ", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "宙星ぱる", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "天唄サウ", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "U者", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "ラメリィ", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "Rio", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "リモーネ先生", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "れいか", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "和央パリン", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "春雨麗女", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "りもこん", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "しゅうと", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "かざね", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "FB777", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "KIKKUN-MK-II", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "あろまほっと", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "eoheoh", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "たいたい", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "歌広場淳", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "米将軍", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: NB error"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: NB error" },
-        { "name": "チョコブランカ", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: Rest"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: Rest" },
-        { "name": "ぐちつぼ", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "焼きパン", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "島村シャルロット", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: NB error"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: NB error" },
-        { "name": "堰代ミコ", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "柚原いづみ", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "飛良ひかり", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "家入ポポ", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "日向ましゅ", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: NB error"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: NB error" },
-        { "name": "幽音しの", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: Rest"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: Rest" },
-        { "name": "羽流鷲りりり", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: Rest"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: Rest" },
-        { "name": "叶", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "鷹宮リオン", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: Rest"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: Rest" },
-        { "name": "桜凛月", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "空星きらめ", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "ハ ユン", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: Rest"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: Rest" },
-        { "name": "小清水透", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "クロノア", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "トラゾー", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: NB error"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: NB error" },
-        { "name": "渋谷ハル", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "心白てと", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: Rest"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: Rest" },
-        { "name": "絲依とい", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "柊ツルギ", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "八神ツクモ", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "甘音あむ", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "日裏クロ", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "日ノ隈らん", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "しるこ", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "じらいちゃん", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "a1857", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "はこたろー", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "夜乃くろむ", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: Rest"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: Rest" },
-        { "name": "蝶屋はなび", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: Rest"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: Rest" },
-        { "name": "ぷちぷち", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "ひなこ", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "アルランディス", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "律可", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "アステル・レダ", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "夜十神封魔", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: NB error"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: NB error" },
-        { "name": "羽継烏有", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "アクセル・シリオス", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "アキ・ローゼンタール", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "ヒカック", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "ぎぞく", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "鬱先生", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "トントン", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "ゾム", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "ショッピ", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "甘狼このみ", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "シャークん", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "Akira", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "スマイル", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "ピヤノ", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "ズズ", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: Rest"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: Rest" },
-        { "name": "天鬼ぷるる", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "とおこ", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "dtto.", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "巫神こん", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "ろぜっくぴん", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "折咲もしゅ", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "玉餅かずよ", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "かしわねこ", "affiliation": "参加配信者", "platform": "Twitch", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "秋雪こはく", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "鴉羽そら", "affiliation": "参加配信者", "platform": "YouTube", "status": [], "role": "Adventurer", "note": "DoZ参加者アーカイブ。" },
-        { "name": "白熊つらら", "affiliation": "参加配信者", "platform": "YouTube", "status": ["Note: NB error"], "role": "Adventurer", "note": "DoZ参加者アーカイブ。 Note: NB error" }
-    ],
-    parties: [
-        { name: "モノパス (チームスマイル)", members: ["シャークん", "Akira", "スマイル", "ピヤノ"], origin: "事前結成・少数精鋭", story: "全サーバーで最初に第1層ボスを討伐した伝説の4人組。", anecdote: "徹底した役割分担とプレイスキルで頭角を現した。" },
-        { name: "ドズル社ガチ攻略組", members: ["ドズル", "おんりー", "トントン", "チーノ", "なな湖", "ヒカック"], origin: "ドズルによるスカウト", story: "1000年を生きる大魔導士なな湖らをオーディションで選抜した最強パーティー。", anecdote: "開始直後、ヒカックが迷子になり茶々茶チームに預けられるハプニングも。" },
-        { name: "ブザービーター", members: ["島村シャルロット", "絲依とい", "ヘンディー", "ショッピ", "レイカ", "ケッツン"], origin: "助っ人合流による結成", story: "全6職業が揃った奇跡のバランス。劇的な勝利から命名。", anecdote: "層に合わせた柔軟な職業変更で戦い抜いた。" },
-        { name: "頑張るブラザーズ", members: ["夜十神封魔", "羽継烏有", "marunnn", "AlphaAzur", "ぼんじゅうる", "柚原いづみ"], origin: "ボス前での命名", story: "ホロスターズ、ドズル社、NeoPorteが混ざり合った明るい混成部隊。", anecdote: "突入直前のノリでチーム名が決定した。" },
-        { name: "トリプルA (ゴミ拾い組)", members: ["まぐにぃ", "はこたろー", "まさのりch", "じゃじゃまる", "かしわねこ", "ラメリィ"], origin: "独自のメタプレイ戦略", story: "他者の『ゴミ』をアイテムに変え、爆速レベリングを行う異端の集団。", anecdote: "召喚の笛を独占し、安全地帯で敵を呼び出し続けた効率厨の極み。" },
-        { name: "#花君 (花盛りの君たちへ)", members: ["小清水透", "椎名唯華", "奈羅花", "ニコラ・クラエス", "家入ポポ", "トラゾー"], origin: "偶然の出会い", story: "女子＋トラゾーによる仲良し攻略組。応援タグ『#花君WIN』で高い人気を博した。", anecdote: "和気あいあいとした実況スタイルが特徴。" },
-        { name: "小賢しい戦術部隊", members: ["アマル", "ぼんじゅうる", "夜十神封魔", "柚原いづみ", "羽流鷲りりり", "marunnn"], origin: "リスク管理の徹底", story: "1人だけを残して全員が装備を脱いでデスし、アイテム消失を最小限に抑える戦法を採用。", anecdote: "過酷なデスペナルティに対するシステム的な回答。" }
-    ],
-    raid: {
+const DATA = {logs:[{day:1,title:"Day 1: Genesis",topic:"1日目：ディアボロスの洗礼とゴミ拾いメタ",content:"サーバーオープン直後の大混乱。第1層ボス『ディアボロス』による絶望。そして『ゴミ釣り』という独自のレベリング文化の誕生。",episodes:[{title:"ドズル社ガチ攻略パーティー",desc:"ドズルを中心に、おんりー、トントン、チーノ、なな湖、ヒカックが集結。職業バランスを重視した完璧な布陣でスタートを切る。"},{title:"モノパス（チームスマイル）",desc:"シャークん、Akira、スマイル、ピヤノの4名。圧倒的なセンスでサーバー初の第1層ボス討伐を成し遂げた。"},{title:"チームゴミ収集（トリプルA）",desc:"まぐにぃ、はこたろー、まさのりchらが『召喚の笛』を狙ってゴミを回収。爆速レベリング手法を確立。"}]},{day:2,title:"Day 2: The Labyrinth",topic:"2日目：死の迷宮と雪山の暴君オーディン",content:"第2層の広大な迷宮に苦しむ冒険者たち。トロフィー納品が必要な『オシリス』戦。そして雪山の強敵『オーディン』との2時間に及ぶ死闘。",episodes:[{title:"「花盛りの君たちへ（#花君）」",desc:"小清水透、椎名唯華、奈羅花、ニコラ、家入ポポ、トラゾー。和気あいあいと迷路を攻略する女子＋トラゾーパーティー。"},{title:"神父28さんの祈り",desc:"教会に常駐し、無償で蘇生し続けるロールプレイ。多くのPTを陰から支える聖域となった。"}]},{day:3,title:"Day 3: The Great Raid",topic:"3日目：カジノ解禁と、18人レイドボス『ゼピュロス』",content:"カジノの実装によるギャンブルの狂気。最大18人で挑む『ゼピュロス』レイド。称号の色（緑・白・黄）による大規模な陣形連携。",episodes:[{title:"18人合同レイド（緑・白・黄）",desc:"叶、Kamito、たけぉ、しるこ、まさのりらの大集結。色分けによる陣形指揮で巨悪に挑む。"},{title:"プッシュマンの暗躍",desc:"隠しボタンの座標情報を売買するビジネスが誕生し、探索が加速した。"}]},{day:4,title:"Day 4: The Wall",topic:"4日目：ホワイトバスと最前線の絶望『エキドナ』",content:"モロクのデバフ対策として『ホワイトバス』が発見される。Lv40スキルの解放。しかし、第6層『エキドナ』という未曾有の壁が立ちはだかる。",episodes:[]},{day:5,title:"Day 5: The Stalemate",topic:"5日目：折り返し地点と、第7層の「沈黙」",content:"第6層ボス『エキドナ』が最大のスタッパーとして君臨。最前線は第7層に到達するも、石像と即死の猛攻により1日を通してクリア者ゼロという異常事態に。",episodes:[{title:"第6層ボスでの大スタック",desc:"スロー（鈍足）スキルの維持と、アーチャー複数編成によるヘイト管理の重要性が認識され、攻略の鍵となった。"},{title:"第5層大規模レイド",desc:"最大18人、フルパーティー同士が手を取り合うお祭り騒ぎ。一方でサーバーダウンなどのトラブルも発生。"},{title:"カジノ新要素と1.2倍お守り",desc:"『ちんちろ』解禁。50万ドズで買える経験値ブーストお守りにより、Lv60を目指すレベリングが加速。"}]},{day:6,title:"Day 6: Breaking the Storm",topic:"6日目：7層突破と、再編の嵐",content:"第7層ボス『ネメシス』の攻略法が確立され始め、ついに最前線が第8層（ミニゲームの階層）へ。難易度の上昇に伴い、チームの枠を超えた合流や、不足ジョブを補うための『傭兵』要請が本格化した。",episodes:[{title:"チームち（血）の誕生",desc:"心白てと、ゾム、あきピヨらによる合流チーム。全員の語尾に『ち』を付ける独自の結束で、過酷な攻略に挑む。"},{title:"ウォンテッドとハイエナ",desc:"アルランディス、たいたいらが結成。他PTの獲物を横から狙うプレイスタイルから命名されたが、その実力は一級品。"},{title:"ジョブ不足のパズル",desc:"ズズ、猫おじ、黒炭酸らの間で、Discord上での綿密なメンバー調整。特定のボスのために『ナイト貸します』といった交渉が裏で行われた。"}]},{day:7,title:"Day 7: The Last Ascent",topic:"7日目：第9層到達と、ブザービーター",content:"最前線が第9層へ到達。しかしボスの異常なHPの高さが壁となる。一方で、下層で詰まっているプレイヤーを上位勢が引き上げる『キャリー（お手伝い）』の文化が全域に広がった。",episodes:[{title:"チームブザービーター誕生",desc:"ドズル、ヒカックらが7層ボスにて制限時間0秒と同時にクリア。劇的な勝利からそのままチーム名となった。"},{title:"カジノ狂騒曲（チンチロメタ）",desc:"装備修理費のインフレにより、カジノでの金策が必須に。1000万DoZの大金を稼ぐ冒険者が続出した。"},{title:"MSSP救出劇",desc:"4層で詰まっていたMSSPを、さかいさんだー・しるこら高レベル勢が電撃支援。格差を超えた協力が大きな話題に。"}]},{day:8,title:"Day 8: Before the End",topic:"8日目：最終層『ハデス』の門、そして特別措置",content:"企画終了の前日。不具合により第9層ボスのクリア判定に特別措置が取られる異例の事態に。深夜までプレイ時間が延長され、Lv70〜80まで上げた強者たちが最終第10層へ足を踏み入れた。",episodes:[{title:"マニュアルゲーミング（MG）",desc:"アルランディスらが、ボスのギミックを完全にマニュアル化して効率化。統率された動きで最前線を駆け抜ける。"},{title:"チーム『ゴミ』の結成",desc:"ろぜっくぴん、秋雪こはくらによる女子チーム。LINEグループ名がそのまま定着した、飾らない絆の象徴。"},{title:"10層への絶望と期待",desc:"『最大の恐怖は4度乗り越えられる』。門に刻まれた言葉。サーバー内の全精鋭が集結する未曾未のレイドバトルの予感。"}]}],members:[{name:"ドズル",affiliation:"ドズル社",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"ぼんじゅうる",affiliation:"ドズル社",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"おんりー",affiliation:"ドズル社",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"おらふくん",affiliation:"ドズル社",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"おおはらMEN",affiliation:"ドズル社",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"ネコおじ",affiliation:"参加配信者",platform:"YouTube",status:["Note: NB error"],role:"Adventurer",note:"DoZ参加者アーカイブ。 Note: NB error"},{name:"赤髪のとも",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"あきピヨ",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"福井のカズさん",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"さかいさんだー",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"まぐにぃ",affiliation:"参加配信者",platform:"YouTube",status:["Note: NB error"],role:"Adventurer",note:"DoZ参加者アーカイブ。 Note: NB error"},{name:"メッス",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"まろ",affiliation:"参加配信者",platform:"YouTube",status:["Note: NB error"],role:"Adventurer",note:"DoZ参加者アーカイブ。 Note: NB error"},{name:"アマル",affiliation:"参加配信者",platform:"YouTube",status:["Note: Rest"],role:"Adventurer",note:"DoZ参加者アーカイブ。 Note: Rest"},{name:"AlphaAzur",affiliation:"参加配信者",platform:"YouTube",status:["Note: Rest"],role:"Adventurer",note:"DoZ参加者アーカイブ. Note: Rest"},{name:"rpr",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"おなつのにびたし",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"Kamito",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"KAWAIICLUB",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"ギルくん",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"金豚きょー",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"黒炭酸",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"けっつん",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"じゃじゃまる",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"しょぼすけ",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"しろまんた",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"げんぴょん",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"たらこ",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"んそめ",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"ごんかね",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"緑色(みどりくん)",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"だいだら",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"たけぉ",affiliation:"参加配信者",platform:"YouTube",status:["Note: NB error"],role:"Adventurer",note:"DoZ参加者アーカイブ。 Note: NB error"},{name:"ちーの",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"茶々茶",affiliation:"参加配信者",platform:"YouTube",status:["Note: NB error"],role:"Adventurer",note:"DoZ参加者アーカイブ. Note: NB error"},{name:"天開司",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"トナカイト(ヘンディー)",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"なな湖",affiliation:"参加配信者",platform:"YouTube",status:["Note: Rest"],role:"Adventurer",note:"DoZ参加者アーカイブ. Note: Rest"},{name:"ニコラ･クラエス",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"寧々丸",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"のばまん",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"ハセシン",affiliation:"参加配信者",platform:"YouTube",status:["Note: Rest"],role:"Adventurer",note:"DoZ参加者アーカイブ。 Note: Rest"},{name:"ぴくと",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"日向まる",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"ひょう太朗",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"28",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"まさのりch",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"marunnn",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"みつき",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"最高コーラ",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"ゆふな",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"猫麦とろろ",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"宙星ぱる",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"天唄サウ",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"U者",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"ラメリィ",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"Rio",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"リモーネ先生",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"れいか",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"和央パリン",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"春雨麗女",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"りもこん",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"しゅうと",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"かざね",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"FB777",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"KIKKUN-MK-II",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"あろまほっと",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"eoheoh",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"たいたい",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"歌広場淳",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"米将軍",affiliation:"参加配信者",platform:"YouTube",status:["Note: NB error"],role:"Adventurer",note:"DoZ参加者アーカイブ。 Note: NB error"},{name:"チョコブランカ",affiliation:"参加配信者",platform:"YouTube",status:["Note: Rest"],role:"Adventurer",note:"DoZ参加者アーカイブ。 Note: Rest"},{name:"ぐちつぼ",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"焼きパン",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"島村シャルロット",affiliation:"参加配信者",platform:"YouTube",status:["Note: NB error"],role:"Adventurer",note:"DoZ参加者アーカイブ。 Note: NB error"},{name:"堰代ミコ",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"柚原いづみ",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"飛良ひかり",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"家入ポポ",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"日向ましゅ",affiliation:"参加配信者",platform:"YouTube",status:["Note: NB error"],role:"Adventurer",note:"DoZ参加者アーカイブ。 Note: NB error"},{name:"幽音しの",affiliation:"参加配信者",platform:"YouTube",status:["Note: Rest"],role:"Adventurer",note:"DoZ参加者アーカイブ。 Note: Rest"},{name:"羽流鷲りりり",affiliation:"参加配信者",platform:"YouTube",status:["Note: Rest"],role:"Adventurer",note:"DoZ参加者アーカイブ。 Note: Rest"},{name:"叶",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"鷹宮リオン",affiliation:"参加配信者",platform:"YouTube",status:["Note: Rest"],role:"Adventurer",note:"DoZ参加者アーカイブ。 Note: Rest"},{name:"桜凛月",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"空星きらめ",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"ハ ユン",affiliation:"参加配信者",platform:"YouTube",status:["Note: Rest"],role:"Adventurer",note:"DoZ参加者アーカイブ。 Note: Rest"},{name:"小清水透",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"クロノア",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"トラゾー",affiliation:"参加配信者",platform:"YouTube",status:["Note: NB error"],role:"Adventurer",note:"DoZ参加者アーカイブ。 Note: NB error"},{name:"渋谷ハル",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"心白てと",affiliation:"参加配信者",platform:"YouTube",status:["Note: Rest"],role:"Adventurer",note:"DoZ参加者アーカイブ。 Note: Rest"},{name:"絲依とい",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"柊ツルギ",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"八神ツクモ",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"甘音あむ",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"日裏クロ",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"日ノ隈らん",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"しるこ",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"じらいちゃん",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"a1857",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"はこたろー",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"夜乃くろむ",affiliation:"参加配信者",platform:"YouTube",status:["Note: Rest"],role:"Adventurer",note:"DoZ参加者アーカイブ。 Note: Rest"},{name:"蝶屋はなび",affiliation:"参加配信者",platform:"YouTube",status:["Note: Rest"],role:"Adventurer",note:"DoZ参加者アーカイブ。 Note: Rest"},{name:"ぷちぷち",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"ひなこ",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"アルランディス",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"律可",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"アステル・レダ",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"夜十神封魔",affiliation:"参加配信者",platform:"YouTube",status:["Note: NB error"],role:"Adventurer",note:"DoZ参加者アーカイブ. Note: NB error"},{name:"羽継烏有",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"アクセル・シリオス",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"アキ・ローゼンタール",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"ヒカック",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"ぎぞく",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"鬱先生",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"トントン",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"ゾム",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"ショッピ",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"甘狼このみ",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"シャークん",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"Akira",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"スマイル",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"ピヤノ",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"ズズ",affiliation:"参加配信者",platform:"YouTube",status:["Note: Rest"],role:"Adventurer",note:"DoZ参加者アーカイブ. Note: Rest"},{name:"天鬼ぷるる",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"とおこ",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"dtto.",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"巫神こん",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"ろぜっくぴん",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"折咲もしゅ",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"玉餅かずよ",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"かしわねこ",affiliation:"参加配信者",platform:"Twitch",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"秋雪こはく",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"鴉羽そら",affiliation:"参加配信者",platform:"YouTube",status:[],role:"Adventurer",note:"DoZ参加者アーカイブ。"},{name:"白熊つらら",affiliation:"参加配信者",platform:"YouTube",status:["Note: NB error"],role:"Adventurer",note:"DoZ参加者アーカイブ. Note: NB error"}],parties:[{name:"チームブザービーター",members:["ドズル","おんりー","おおはらMEN","ヒカック","チーノ","なな湖","柊ツルギ"],origin:"7層突破時の劇的な結末",story:"第7層ボス戦にて、制限時間0秒と同時に討伐を完了した奇跡のチーム. その勢いで10層へ一番乗りを果たす。",anecdote:"柊ツルギ（剣君）の加入により、さらに攻撃的な布陣へと進化した。"},{name:"モノパス (Monopass)",members:["シャークん","Akira","スマイル","ピヤノ"],origin:"攻略最前線のパイオニア",story:"圧倒的なプレイスキルで常にトップを走り続ける4人組. 8層到達の速さは全プレイヤーを一驚させた。",anecdote:"他プレイヤーから『モノパス軍団』と一目置かれる攻略の基準点。"},{name:"ASADA騎士団",members:["ハセシン","甘狼このみ","折咲もしゅ","渋谷ハル"],origin:"配信者たちの結束",story:"ハセシンを中心に結成. 10層クリアを見据え、下層プレイヤーの支援（キャリー）も積極的に行う義理堅い集団。",anecdote:"『岡間バーで働いてそう』『ママさんバレー』など、仲の良すぎるいじり合いが絶えない。"},{name:"00界隈 (ゼロゼロ界隈)",members:["ろぜっくぴん","白熊つらら","桜凛月","アルランディス","アステル・レダ","夜十神封魔"],origin:"深夜の攻略コミュニティ",story:"進行度の近い精鋭が集まった混成部隊. 独自のVCルールを確立し、高難易度ギミックに対応する。",anecdote:"会話の中で自然発生した名称. 高い連携力で9層を突破した。"},{name:"乙カレー海賊団",members:["カズさん","まぐにぃ","じゃじゃまる","しゅうと","かざね","リモーネ先生"],origin:"Discord의 表示名から",story:"『お疲れ』と『海賊』を掛け合わせた名称. 一時期はNPCの敵勢力と間違われるハプニングも。",anecdote:"8日目には他PTへの『騎士貸し出し』を行うなど、サーバーの守護神的存在に。"},{name:"ゴミ (LINEグループ名)",members:["ろぜっくぴん","秋雪こはく","dtto.","巫神こん"],origin:"仲良し4人組の自虐",story:"攻略を通じて意気投合し、作成したLINEグループ名がそのまま定着. 飾らない絆で過酷な塔を登る。",anecdote:"『私たちゴミだね』という冗談から始まった、世界一愛されるチーム名。"},{name:"マニュアルゲーミング (MG)",members:["アルランディス","宙星ぱる","たいたい","律可"],origin:"戦術の効率化・マニュアル化",story:"複雑なボスギミックを徹底的にマニュアル化. 論理的な攻略で、初見の壁を次々と粉砕した。",anecdote:"『オーナー』などの役職を付け、会社組織のようなノリで攻略を楽しむ。"}],bestiary:[
+        { floor: 1, name: "絶望の支配者 ディアボロス", title: "The Ruler of Despair", day: 1, gimmicks: ["吸い込みからの吹き飛ばし", "地面からの突き上げ", "魔法陣の拘束"], strategy: "初期装備不可。ヒーラー2人構成推奨。", notes: "レベリング周回の対象。" },
+        { floor: 2, name: "黄金の王 オシリス", title: "The Golden Pharaoh", day: 2, gimmicks: ["宝箱ギミック5個納品", "棺桶の追跡", "スローフィールド"], strategy: "タンク固定が必須。高台安置の活用。", notes: "広大な迷宮が門番。" },
+        { floor: 3, name: "雪山の暴君 オーディン", title: "Tyrant of the Snow Mountain", day: 2, gimmicks: ["氷のつらら", "馬の突進", "無敵モード"], strategy: "炎属性・毒DoTが特効。", notes: "オーディンの宝玉ドロップ。" },
+        { floor: 4, name: "魔神 モロク", title: "The Purgatory Demon", day: 3, gimmicks: ["チェス駒の破壊ギミック", "広範囲マグマ攻撃", "持続不滅デバフ"], strategy: "ホワイトバス・手榴弾でデバフ対策。チェス駒の迅速な処理が鍵。", notes: "マグマ地帯の難所。" },
+        { floor: 5, name: "嵐の王 ゼピュロス", title: "The Wind Raid Lord", day: 3, gimmicks: ["18人レイド制限", "50体生贄入場", "生命の樹破壊"], strategy: "18人合同軍による3面同時展開。", notes: "詳細はALLIANCES項参照。" },
+        { floor: 6, name: "万魔の母 エキドナ", title: "Mother of All Monsters", day: 4, gimmicks: ["圧倒的火力", "呪いの鎖爆発", "取り巻き連動HP"], strategy: "スロー維持と徹底したヘイト管理。アーチャー複数編成が主流。", notes: "6日目時点で多くのチームが突破。" },
+        { floor: 7, name: "復讐の女神 ネメシス", title: "The Goddess of Revenge", day: 5, gimmicks: ["雷属性の範囲攻撃", "職業別石像の破壊", "即死フィールド"], strategy: "自身の職の石像を迅速に壊す連携。Lv60スキルの解禁が突破口。", notes: "モノパスが世界最速突破。" },
+        { floor: 8, name: "豊穣の女神 イシュタル", title: "The Goddess of Ishtar", day: 6, gimmicks: ["死のミニゲーム連続発生", "指定色の床踏み", "装備破壊ペナルティ"], strategy: "アスレチックとクイズの突破が前提。ミニゲーム失敗は全装備破壊の危機。", notes: "第8層到達の象徴として語られた。" },
+        { floor: 9, name: "万魔の父 テュポーン", title: "The Father of Monsters", day: 7, gimmicks: ["足の部位破壊によるダウン", "最終フェーズの即死攻撃", "高耐久"], strategy: "足を集中攻撃してダウンを奪い、本体に火力を叩き込む。", notes: "不具合によりクリア判定の特別措置が取られた。" },
+        { floor: 10, name: "冥府の王 ハデス", title: "The Lord of Hades", day: 8, gimmicks: ["12-18人超大規模レイド", "4段階の形態変化", "Lv80モブの召喚"], strategy: "サーバー内全トッププレイヤーの連携が不可欠。最大の恐怖を4度乗り越えろ。", notes: "絶望の最終階層。" }
+      ],dungeon:{manifesto:[{title:"所持装備喪失",content:"強制復活時、装備1箇所を消失。"},{title:"深夜2時の強制送還",content:"全プレイヤーが街へ転送。"},{title:"レベル差補正",content:"レベル差による経験値減衰. 格上狩りが基本。"},{title:"チンチロメタ",content:"装備修理費高騰により、カジノでの金策が必須に。"}],floors:[{level:1,name:"THE BEGINNING",concept:"始まりの回廊",mobs:"スライム、ワイト等",gimmicks:[{tag:"WIND",desc:"風を読み、安全地帯へ移動。"}],notes:"初心者の登竜門。"},{level:2,name:"LABYRINTH & FARM",concept:"砂漠の迷宮 / 聖地",mobs:"神殿守り、トラップミミック",gimmicks:[{tag:"LEVELLING",desc:"トラップチェストによる無限湧き。"},{tag:"POWER",desc:"上位勢による引率レベリング。"}],notes:"レベリングの聖地。"},{level:3,name:"FROZEN WASTELAND",concept:"雪山のオープンフィールド",mobs:"氷騎士、フロストウルフ",gimmicks:[{tag:"COLD",desc:"移動速度低下の寒気。"}],notes:"ボスは氷の神殿深部。"},{level:4,name:"VOLCANIC CHESS",concept:"マグマとチェス",mobs:"フレアガルーダ等",gimmicks:[{tag:"CHESS",desc:"チェスパズル。"},{tag:"PARKOUR",desc:"命懸けのアスレチック。"}],notes:"MSSPが救出された運命の地。"},{level:5,name:"BLOOMING GARDEN",concept:"和風・四季の庭",mobs:"エキドナの子供たち",gimmicks:[{tag:"DEBUFF",desc:"持続的な生命力減少。"}],notes:"中盤の大きな壁。"},{level:6,name:"HELL'S PIT",concept:"地獄の空洞",mobs:"ケルベロス等",gimmicks:[{tag:"SACRIFICE",desc:"50体生贄誘導。"}],notes:"ディアボロスの再来が待つ。"},{level:7,name:"JUDGEMENT HALL",concept:"雷鳴と裁きの回廊",mobs:"雷精、リベンジャー等",gimmicks:[{tag:"STATUE",desc:"職業別石像ギミック。"},{tag:"INSTANT",desc:"猶予なしの即死雷。"}],notes:"Lv60・新スキルの試金石。"},{level:8,name:"DEATH PARKOUR",concept:"黄金の遊戯場",mobs:"なし(道中ステルス)",gimmicks:[{tag:"STEALTH",desc:"敵の視界を避ける。"},{tag:"LEVER",desc:"隠された9つのレバー。"}],notes:"見つかれば即終了の 極限迷路。"},{level:9,name:"MONSTER'S NEST",concept:"怪物の巣窟",mobs:"ディアボロス(レア)",gimmicks:[{tag:"PART",desc:"部位破壊(ダウン)ギミック。"},{tag:"STEAL",desc:"盗賊によるレア宝玉乱獲。"}],notes:"不具合により歴史に刻まれた階層。"},{level:10,name:"THE APEX",concept:"絶望の頂",mobs:"Lv80骸骨騎士等",gimmicks:[{tag:"RAID",desc:"最大人数の連合軍必須. "},{tag:"HADES",desc:"冥府の王の審判。"}],notes:"最大の恐怖を4度乗り越え克服せよ。"}]}};
+
+// Hydrate missing sections that the renderer expects.
+// (These keys were present in the prior version under `don'tchenge/Dozmatome`.)
+if (!DATA.raid) {
+    DATA.raid = {
         title: "第5層ゼピュロス合同軍 (18人レイド)",
         meta: "死亡者の『救援NPC』機能をワープポイントとして利用するメタ戦術で集結。",
         teams: [
@@ -343,60 +143,57 @@ const DATA = {
             { color: "yellow", name: "黄色チーム", leader: "はこたろー / まぐにぃ", members: "はこたろー、まぐにぃ等のAAAベース", note: "称号『幸運のおすそ分け』で統一。" },
             { color: "fire", name: "炎(赤)チーム", leader: "アステル / 叶", members: "アステル、アルランディス、叶等の混成", note: "称号『万物の破壊者』で統一。" }
         ]
-    },
-    bestiary: [
-        { floor: 1, name: "絶望の支配者 ディアボロス", title: "The Ruler of Despair", day: 1, gimmicks: ["吸い込みからの吹き飛ばし", "地面からの突き上げ", "魔法陣の拘束"], strategy: "初期装備不可。ヒーラー2人構成推奨。", notes: "レベリング周回の対象。" },
-        { floor: 2, name: "黄金の王 オシリス", title: "The Golden Pharaoh", day: 2, gimmicks: ["宝箱ギミック5個納品", "棺桶の追跡", "スローフィールド"], strategy: "タンク固定が必須。高台安置の活用。", notes: "広大な迷宮が門番。" },
-        { floor: 3, name: "雪山の暴君 オーディン", title: "Tyrant of the Snow Mountain", day: 2, gimmicks: ["氷のつらら", "馬の突進", "無敵モード"], strategy: "炎属性・毒DoTが特効。", notes: "オーディンの宝玉ドロップ。" },
-        { floor: 4, name: "煉獄 of Purgatory", day: 3, gimmicks: ["回復減衰デバフ", "雑魚召喚(回復阻止)", "隕石落下"], strategy: "ホワイトバス・手榴弾で対策。", notes: "チェスパズルの後。" },
-        { floor: 5, name: "嵐の王 ゼピュロス", title: "The Wind Raid Lord", day: 3, gimmicks: ["18人レイド制限", "50体生贄入場", "生命の樹破壊"], strategy: "18人合同軍による3面同時展開。", notes: "詳細はALLIANCES項参照。" },
-        { floor: 6, name: "万魔の母 エキドナ", title: "Mother of All Monsters", day: 4, gimmicks: ["圧倒的火力", "呪いの鎖爆発", "取り巻き連動HP"], strategy: "スロー維持と徹底したヘイト管理。アーチャー複数編成が主流。", notes: "6日目時点で多くのチームが突破。" },
-        { floor: 7, name: "復讐の女神 ネメシス", title: "The Goddess of Revenge", day: 5, gimmicks: ["雷属性の範囲攻撃", "職業別石像の破壊", "即死フィールド"], strategy: "自身の職の石像を迅速に壊す連携。Lv60スキルの解禁が突破口。", notes: "モノパスが世界最速突破。" },
-        { floor: 8, name: "知識の守護者 クイズマスター", title: "The Riddle Sentinel", day: 6, gimmicks: ["4択クイズ", "ミニゲーム", "反射神経試練"], strategy: "知識の共有と協力。戦闘以外の能力が試される。", notes: "一時のレクリエーション階層。" }
-    ],
-    dungeon: {
-        manifesto: [
-            { title: "所持装備喪失", content: "強制復活時、装備1箇所を消失。" },
-            { title: "深夜2時の強制送還", content: "全プレイヤーが街へ転送。" },
-            { title: "レベル差補正", content: "レベル差による経験値減衰。" },
-            { title: "ログアウト・リセット", content: "ログアウト時は街から再開。" }
-        ],
-        floors: [
-            { level: 1, name: "THE GENESIS", concept: "一本道チュートリアル", mobs: "スライム、ワイト等", gimmicks: [{ tag: "DEPTH", desc: "奥に進むほどLv上昇。" }], notes: "初心者の狩場。" },
-            { level: 2, name: "LABYRINTH", concept: "砂漠の迷宮", mobs: "神殿守り等", gimmicks: [{ tag: "KEYS", desc: "多色の鍵集め。"}, { tag: "TRAP", desc: "罠チェスト(赤留め具)。" }, { tag: "EYE", desc: "目の壁(不視移動)。"}], notes: "マッピング必須。" },
-            { level: 3, name: "FROZEN", concept: "雪山のオープンフィールド", mobs: "氷騎士等", gimmicks: [{ tag: "ROUTE", desc: "外周走破が正解。" }], notes: "ボスは氷の神殿。" },
-            { level: 4, name: "VOLCANO", concept: "マグマとチェス", mobs: "フレアガルーダ等", gimmicks: [{ tag: "CHESS", desc: "万丈の試練。"}, { tag: "MAGMA", desc: "スニーク無効化。"}], notes: "キャラコン必須の崖登り。" },
-            { level: 5, name: "FOUR SEASONS", concept: "和風四季エリア", mobs: "レアモブ『経験値』", gimmicks: [{ tag: "RAID", desc: "12-18人合同必須。"}], notes: "五重の塔が目印。" },
-            { level: 6, name: "HELLSCAPE", concept: "地獄の空洞", mobs: "ケルベロス等", gimmicks: [{ tag: "SACRIFICE", desc: "50体生贄誘導。"}], notes: "不気味な半熟卵。魔の6層と呼ばれる。" },
-            { level: 7, name: "TEMPEST", concept: "雷鳴と裁きの回廊", mobs: "雷精、リベンジャー等", gimmicks: [{ tag: "STATUE", desc: "職別の石像ギミック。"}, { tag: "BOLT", desc: "不可避の雷撃。"}], notes: "5日目の沈黙を呼んだ難関。" },
-            { level: 8, name: "ENTERTAINMENT", concept: "黄金の遊戯場", mobs: "なし(平和？)", gimmicks: [{ tag: "QUIZ", desc: "死の4択。"}, { tag: "GAME", desc: "一発勝負のミニゲーム。"}], notes: "カジノとは別のギャンブル感。" }
-        ],
-        secrets: [
-            { place: "釣り場裏", info: "隠しボタン1" },
-            { place: "塔の裏", info: "隠しボタン2" },
-            { place: "劇場裏", info: "隠しボタン3" },
-            { place: "実家裏", info: "隠しボタン4" },
-            { place: "初期スポ家裏", info: "隠しボタン5" }
-        ]
-    }
-};
+    };
+}
+if (!DATA.dungeon) DATA.dungeon = { manifesto: [], secrets: [], floors: [] };
+if (!Array.isArray(DATA.dungeon.secrets)) {
+    DATA.dungeon.secrets = [
+        { place: "釣り場裏", info: "隠しボタン1" },
+        { place: "塔の裏", info: "隠しボタン2" },
+        { place: "劇場裏", info: "隠しボタン3" },
+        { place: "実家裏", info: "隠しボタン4" },
+        { place: "初期スポ家裏", info: "隠しボタン5" }
+    ];
+}
 
 let currentView = 'story';
 
-function render() {
-    const container = document.getElementById('main-content');
-    container.innerHTML = '';
-    window.scrollTo(0, 0);
-
-    if (currentView === 'story') renderStory(container);
-    else if (currentView === 'members') renderMembers(container);
-    else if (currentView === 'parties') renderParties(container);
-    else if (currentView === 'dungeon') renderDungeon(container);
-    else if (currentView === 'bestiary') renderBestiary(container);
-    else if (currentView === 'logs') renderLogs(container);
-
-    initObserver();
-}
+  function render() {
+      const container = document.getElementById('main-content');
+      if (!container) return;
+  
+      container.innerHTML = '';
+      window.scrollTo(0, 0);
+  
+      try {
+          if (currentView === 'story') renderStory(container);
+          else if (currentView === 'members') renderMembers(container);
+          else if (currentView === 'parties') renderParties(container);
+          else if (currentView === 'dungeon') renderDungeon(container);
+          else if (currentView === 'bestiary') renderBestiary(container);
+          else if (currentView === 'logs') renderLogs(container);
+      } catch (err) {
+          console.error('[DoZ] render failed:', err);
+          container.innerHTML = `
+              <div class="section-wrapper">
+                  <div class="chapter-header reveal">
+                      <span class="chapter-num">ERROR</span>
+                      <h2 class="section-title">表示エラー</h2>
+                  </div>
+                  <div class="narrative-box reveal">
+                      <p class="narrative-text">このページのデータ構造が壊れている可能性があります。コンソールのエラーを確認してください。</p>
+                  </div>
+              </div>
+          `;
+      }
+  
+      try {
+          initObserver();
+      } catch (err) {
+          console.error('[DoZ] initObserver failed:', err);
+          document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+      }
+  }
 
 function renderStory(container) {
     container.innerHTML = `
@@ -580,24 +377,32 @@ function renderDungeon(container) {
     `;
 }
 
-function renderLogs(container) {
-    container.innerHTML = `
-        <div class="section-wrapper">
-            <div class="chapter-header reveal"><span class="chapter-num">${t('logs.chapter')}</span><h2 class="section-title">${t('logs.title')}</h2></div>
-            <div class="log-list">
-                ${DATA.logs.map(log => `
-                    <div class="log-card reveal"><h3>Vol. ${log.day}: ${log.title}</h3><p style="margin-bottom: 2rem; font-weight: 500;">${log.topic}</p><p class="narrative-text">${log.content}</p>
-                    ${log.episodes.length > 0 ? `<div class="episode-list">${log.episodes.map(e => `<div class="episode-item"><strong>${e.title}</strong><p style="font-size: 0.95rem; color: var(--ink-light);">${e.desc}</p></div>`).join('')}</div>` : ''}</div>
-                `).join('')}
-            </div>
-            <div class="next-phase-footer reveal"><button class="next-chapter-btn" onclick="switchView('story')">${t('logs.backToPrologue')} <i class="fa-solid fa-rotate-left"></i></button></div>
-        </div>
-    `;
-}
+  function renderLogs(container) {
+      const logs = Array.isArray(DATA.logs) ? [...DATA.logs].sort((a, b) => (a?.day ?? 0) - (b?.day ?? 0)) : [];
+      container.innerHTML = `
+          <div class="section-wrapper">
+              <div class="chapter-header reveal"><span class="chapter-num">${t('logs.chapter')}</span><h2 class="section-title">${t('logs.title')}</h2></div>
+              <div class="log-list">
+                  ${logs.map(log => `
+                      <div class="log-card reveal"><h3>Vol. ${log.day}: ${log.title}</h3><p style="margin-bottom: 2rem; font-weight: 500;">${log.topic}</p><p class="narrative-text">${log.content}</p>
+                      ${log.episodes.length > 0 ? `<div class="episode-list">${log.episodes.map(e => `<div class="episode-item"><strong>${e.title}</strong><p style="font-size: 0.95rem; color: var(--ink-light);">${e.desc}</p></div>`).join('')}</div>` : ''}</div>
+                  `).join('')}
+              </div>
+              <div class="next-phase-footer reveal"><button class="next-chapter-btn" onclick="switchView('story')">${t('logs.backToPrologue')} <i class="fa-solid fa-rotate-left"></i></button></div>
+          </div>
+      `;
+  }
 
 function highlightInitial(name, active) { return active ? `<span class="doom-letter">${name.charAt(0)}</span>${name.slice(1)}` : name; }
 function setupSearch() { const s = document.getElementById('m-search'); if (s) s.addEventListener('input', e => { const v = e.target.value.toLowerCase(); document.querySelectorAll('.book3d-container').forEach(c => c.style.display = c.innerText.toLowerCase().includes(v) ? 'block' : 'none'); }); }
-function initObserver() { const o = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }), { threshold: 0.1 }); document.querySelectorAll('.reveal').forEach(el => o.observe(el)); }
+  function initObserver() {
+      if (typeof IntersectionObserver === 'undefined') {
+          document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+          return;
+      }
+      const o = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }), { threshold: 0.1 });
+      document.querySelectorAll('.reveal').forEach(el => o.observe(el));
+  }
 
 window.switchView = (v) => {
     currentView = v;
