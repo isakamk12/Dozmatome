@@ -71,7 +71,34 @@ window.DOZ_I18N_STRINGS = {
 
     "logs.chapter": "年代記",
     "logs.title": "デイリーログ",
-    "logs.backToPrologue": "プロローグへ戻る"
+    "logs.backToPrologue": "プロローグへ戻る",
+
+    "data.logs.day9.title": "The Final Descent",
+    "data.logs.day9.topic": "9日目：9層の突破とレイドバトルの判明",
+    "data.logs.day9.content": "各チームが9層の攻略を進める中、最上階の10層が最大18人（3パーティ合同）で挑む「レイドバトル」であることが判明。パーティの垣根を越えた協力が加速し、深夜にはトップ層による攻略会議で参加者を「第1陣」「第2陣」「第3陣」などに分けて順番に挑む方針が定まった。レベル上げ、作戦の擦り合わせ、装備の受け渡しまで含め、サーバー全体が10層挑戦へ向けて一つにまとまっていく。",
+    "data.logs.day10.title": "Zenith",
+    "data.logs.day10.topic": "10日目：10層ボス「ハデス」の討伐と完全クリア",
+    "data.logs.day10.content": "最終日、合同チーム（第1陣・第2陣など）が10層ボス「ハデス」に挑戦。歴代ボスのギミックが入り乱れる極限の難易度、そして幾度もの全滅の危機を乗り越え、ついに討伐しイベントの完全クリアを達成した。クリア者は「塔の制覇者」などの特別な称号を獲得。討伐後は記念撮影が行われ、26時の塔サーバー閉鎖、27時の街サーバー閉鎖へ向けて劇場での閉会式や釣り・カジノなど、最後の時間を分かち合いながら幕を閉じた。",
+    "data.parties.kome.name": "米将軍団 (コメ将軍団)",
+    "data.parties.kome.story": "ぐちつぼが率いるチーム。「ワンチャンク」という候補もあったが、なぜか米将軍の名前を冠することになった。高い戦闘力と独特のノリで、最終決戦の重要な戦力となった。",
+    "data.parties.asada.name": "朝だ騎士団",
+    "data.parties.asada.story": "天開司、椎名唯華、奈羅花、小清水透らによって結成。どんなジョブになろうと自分たちは「朝だ騎士団」であると誓い合う、熱い結束を見せた。",
+    "data.parties.detective.name": "釣り堀探偵事務所",
+    "data.parties.detective.story": "表向きは釣り堀主、裏の顔は探偵。釣り堀で起きた謎の事件を解決（？）したことで命名。多くのプレイヤーが訪れる癒やしの拠点となった。",
+    "data.parties.teacha.name": "てぃちゃ団",
+    "data.parties.teacha.story": "リモーネ先生（てぃちゃー）が率いる教育的かつ精鋭揃いのチーム。安定した立ち回りで、後続チームの大きな支えとなった。",
+    "data.parties.losers.name": "ちんちろルーザーズ",
+    "data.parties.losers.story": "チンチロで大負けし、ボス戦でも運に見放されがちだったことから命名。不憫を笑いに変えながら、最後まで10層攻略に挑み続けた。",
+    "data.parties.kome.origin": "リーダーの命名",
+    "data.parties.kome.anecdote": "高い戦闘力と独特のノリで、最終決戦の重要な戦力となった。",
+    "data.parties.asada.origin": "深い絆の象徴",
+    "data.parties.asada.anecdote": "最後には「一旦解散。でも騎士団であったことは変わらない」と語り合った。",
+    "data.parties.detective.origin": "釣り堀の事件解決",
+    "data.parties.detective.anecdote": "攻略の合間の癒やしとして、多くのプレイヤーが訪れる拠点となった。",
+    "data.parties.teacha.origin": "先生の引率",
+    "data.parties.teacha.anecdote": "安定した立ち回りで、後続チームの大きな支えとなった。",
+    "data.parties.losers.origin": "カジノでの大敗",
+    "data.parties.losers.anecdote": "「不憫」を笑いに変えながら、最後まで10層攻略に挑み続けた。"
   },
 
   en: {
@@ -144,7 +171,35 @@ window.DOZ_I18N_STRINGS = {
 
     "logs.chapter": "Chronicles",
     "logs.title": "DAILY LOGS",
-    "logs.backToPrologue": "Back to the Prologue"
+    "logs.backToPrologue": "Back to the Prologue",
+
+    "data.logs.day9.title": "The Final Descent",
+    "data.logs.day9.topic": "Day 9: Breakthrough of Floor 9 & Reveal of the Raid",
+    "data.logs.day9.content": "As each team pushed through Floor 9, it was revealed that the final floor, Floor 10, would be a 'Raid Battle' requiring up to 18 players (3 parties combined). Streamers collaborated across party lines, engaging in strategy meetings and gear sharing to prepare for the ultimate challenge.",
+    "data.logs.day10.title": "Zenith",
+    "data.logs.day10.topic": "Day 10: Defeat of 'Hades' & Final Completion",
+    "data.logs.day10.content": "Unified teams challenged the Floor 10 boss, 'Hades'. Despite many close calls against mechanics inherited from all previous bosses, they achieved victory and completed the event. A closing ceremony followed, marking the end of the 9-day grand adventure.",
+
+    "data.parties.kome.name": "Rice Shogunate (Kome Shogunate)",
+    "data.parties.kome.story": "Led by Guchitsubo. Though 'One Chunk' was a candidate name, they somehow ended up named after Kome Shougun. Became a vital force in the final battle.",
+    "data.parties.asada.name": "Asada Knights",
+    "data.parties.asada.story": "Formed around Tenkai Tsukasa. They swore that no matter their jobs, they were forever the 'Asada Knights', showing an unbreakable bond.",
+    "data.parties.detective.name": "Fishing Pond Detective Agency",
+    "data.parties.detective.story": "Pond owners by day, detectives by night. Named after supposedly solving a 'case' at the fishing pond.",
+    "data.parties.teacha.name": "Teacha's Squad",
+    "data.parties.teacha.story": "A squad of elites led by Limone-sensei (Teacha). Provided stable support for trailing teams.",
+    "data.parties.losers.name": "Chinchiro Losers",
+    "data.parties.losers.story": "Named after their massive losses at the casino and bad luck in boss drops. They turned their misfortune into laughter until the very end.",
+    "data.parties.kome.origin": "Named by the Leader",
+    "data.parties.kome.anecdote": "With high combat power and a unique vibe, they became a crucial asset in the final showdown.",
+    "data.parties.asada.origin": "Symbol of Deep Bonds",
+    "data.parties.asada.anecdote": "In the end, they pledged: 'Disbanding for now, but we'll always be the Knights.'",
+    "data.parties.detective.origin": "Solving the Fishing Pond Mystery",
+    "data.parties.detective.anecdote": "A place of healing between raids where many adventurers gathered.",
+    "data.parties.teacha.origin": "The Teacher's Lead",
+    "data.parties.teacha.anecdote": "With stable performance, they were a great pillar of support for following teams.",
+    "data.parties.losers.origin": "Defeat at the Casino",
+    "data.parties.losers.anecdote": "Turning 'pity' into laughter, they challenged Floor 10 until the very end."
   },
 
   "en-GB": {

@@ -1,4 +1,4 @@
-﻿const MEMBERS_DATA = [
+const MEMBERS_DATA = [
     {
         "name": "ドズル",
         "affiliation": "ドズル社",
@@ -1136,3 +1136,6 @@
         "note": "DoZ参加者アーカイブ。 Note: NB error"
     }
 ];
+
+// Expose for both classic scripts and ES modules (e.g. `index.vite.html`).
+globalThis.DOZ_MEMBERS_DATA = MEMBERS_DATA;
